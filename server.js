@@ -12,6 +12,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+
+// Route cho trang từ điển
+app.get('/dictionary-letter', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dictionary.html'));
+});
+
+// Route cho trang từ điển
+app.get('/dictionary-word', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dictionary-word.html'));
+});
+
 // Khởi động server
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);

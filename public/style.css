@@ -141,3 +141,236 @@ h1 {
 .data-actions {
     margin-top: 10px;
 }
+
+.dictionary-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.dictionary-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.dictionary-controls input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.dictionary-controls button {
+    padding: 8px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.dictionary-controls button:hover {
+    background-color: #2980b9;
+}
+
+.dictionary-controls button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.dictionary-progress {
+    font-size: 1.1em;
+}
+
+#current-word {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+#current-dict-char {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #e67e22;
+}
+
+.target-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f0f8ff;
+    border-radius: 8px;
+}
+
+#target-char {
+    font-size: 2em;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+#verification-result {
+    font-size: 1.2em;
+    margin: 10px 0;
+    min-height: 1.5em;
+}
+
+.correct {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.incorrect {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+#next-char-button, #random-char-button {
+    margin: 5px;
+    padding: 8px 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#next-char-button:hover, #random-char-button:hover {
+    background-color: #2980b9;
+}
+
+/* Thêm hiệu ứng chuyển tiếp cho các thay đổi */
+#current-dict-char, #target-char, #verification-result {
+    transition: all 0.3s ease;
+}
+
+/* Hiệu ứng khi ký tự thay đổi */
+.char-changing {
+    transform: scale(1.2);
+    opacity: 0.7;
+}
+
+/* Hiệu ứng khi đúng */
+.correct-char {
+    color: #27ae60;
+    font-weight: bold;
+    transform: scale(1.1);
+}
+
+
+/* Dictionary Module Styles */
+.dictionary-module {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.dictionary-control {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+#dictionary-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.dictionary-display {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.target-word, .current-letter {
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+#current-dict-word, #current-dict-letter {
+    color: #2c3e50;
+    font-size: 24px;
+    margin: 0 5px;
+}
+
+.current-letter {
+    display: flex;
+    align-items: center;
+}
+
+.progress {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.dictionary-feedback {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#dict-feedback-text {
+    font-size: 16px;
+    margin-bottom: 10px;
+    min-height: 24px;
+}
+
+.confidence-meter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.confidence-bar {
+    height: 10px;
+    background-color: #ecf0f1;
+    border-radius: 5px;
+    flex: 1;
+    overflow: hidden;
+}
+
+.confidence-bar > div {
+    height: 100%;
+    background-color: #2ecc71;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.dictionary-history {
+    margin-top: 20px;
+}
+
+#dict-history-list {
+    list-style: none;
+    padding: 0;
+}
+
+#dict-history-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Feedback states */
+.feedback-correct {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.feedback-incorrect {
+    color: #e74c3c;
+}
+
+.feedback-waiting {
+    color: #3498db;
+}

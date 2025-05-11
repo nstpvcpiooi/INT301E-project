@@ -304,10 +304,16 @@ importFileInput.onchange = (event) => {
 };
 
 
-// --- 7. Hàm Chính và Điều Khiển ---
-async function main() {
+// --- 7. Hàm Chính và Điều Khiển --- //turned off async
+function main() {
     initializeMediaPipeHands();
     loadTrainingData();
+    // Add these event listeners
+    document.getElementById('next-char-button').addEventListener('click', getNextChar);
+    document.getElementById('random-char-button').addEventListener('click', getRandomChar);
+
+    // Initialize with first character
+    getNextChar();
 
     startButton.onclick = async () => {
         if (!recognizing) {
@@ -327,5 +333,91 @@ async function main() {
         }
     };
 }
+
+
+
+// --- Add these variables at the top with other declarations ---
+let targetChar = null;
+let currentCharIndex = 0;
+let verificationTimeout = null;
+const VERIFICATION_DELAY = 1000; // ms to wait before verifying
+
+// --- Add these functions ---
+function getNextChar() {
+    currentCharIndex = (currentCharIndex + 1) % ASL_ALPHABET.length;
+    targetChar = ASL_ALPHABET[currentCharIndex];
+    document.getElementById('target-char').textContent = targetChar;
+    document.getElementById('verification-result').textContent = '';
+}
+
+function getRandomChar() {
+    currentCharIndex = Math.floor(Math.random() * ASL_ALPHABET.length);
+    targetChar = ASL_ALPHABET[currentCharIndex];
+    document.getElementById('target-char').textContent = targetChar;
+    document.getElementById('verification-result').textContent = '';
+}
+
+function verifySign(predictedChar) {
+    if (!targetChar) return;
+    
+    const verificationElement = document.getElementById('verification-result');
+    
+    if (predictedChar === targetChar) {
+        verificationElement.textContent = "Chính xác!";
+        verificationElement.className = "correct";
+        
+        // Automatically move to next character after delay
+        clearTimeout(verificationTimeout);
+        verificationTimeout = setTimeout(() => {
+            getNextChar();
+        }, 2000);
+    } else {
+        verificationElement.textContent = "Chưa đúng, hãy thử lại!";
+        verificationElement.className = "incorrect";
+    }
+}
+
+// --- Modify the onHandResults function ---
+function onHandResults(results) {
+    canvasCtx.save();
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    if (videoElement.videoWidth > 0) {
+        if (canvasElement.width !== videoElement.videoWidth) canvasElement.width = videoElement.videoWidth;
+        if (canvasElement.height !== videoElement.videoHeight) canvasElement.height = videoElement.videoHeight;
+    }
+    canvasCtx.translate(canvasElement.width, 0); canvasCtx.scale(-1, 1);
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.restore();
+
+    currentLandmarks = null;
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const handLandmarks = results.multiHandLandmarks[0];
+        currentLandmarks = handLandmarks;
+
+        drawConnectors(canvasCtx, handLandmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 3 });
+        drawLandmarks(canvasCtx, handLandmarks, { color: '#FF0000', lineWidth: 2, radius: 3 });
+
+        const currentTime = Date.now();
+        if (recognizing && (currentTime - lastPredictionTime > PREDICTION_INTERVAL)) {
+            lastPredictionTime = currentTime;
+            const features = extractDistanceFeatures(handLandmarks);
+            if (features) {
+                const prediction = predictKNN(features, K_NEIGHBORS);
+                recognizedCharText.textContent = prediction;
+                
+                // Add verification if we have a target character
+                if (targetChar) {
+                    verifySign(prediction);
+                }
+            } else {
+                recognizedCharText.textContent = "Lỗi trích xuất";
+            }
+        }
+    } else {
+        if (recognizing) recognizedCharText.textContent = "Không thấy tay";
+    }
+}
+
+
 
 main();
