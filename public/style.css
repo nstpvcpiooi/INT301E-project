@@ -1,0 +1,143 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 700px;
+    text-align: center;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.note {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin-bottom: 15px;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    height: 360px; /* Tỉ lệ 4:3 */
+    margin: 20px auto;
+    border: 1px solid #ddd;
+    background-color: #000; /* Nền đen cho video */
+}
+
+.output_canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.controls, .results, .data-collection {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.controls button,
+.data-collection button,
+.import-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 5px;
+}
+
+.controls button:hover:not(:disabled),
+.data-collection button:hover:not(:disabled),
+.import-button:hover {
+    background-color: #2980b9;
+}
+
+.controls button:disabled,
+.data-collection button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+#clear-data-button {
+    background-color: #e74c3c;
+}
+#clear-data-button:hover {
+    background-color: #c0392b;
+}
+
+#export-data-button, .import-button {
+    background-color: #2ecc71;
+}
+#export-data-button:hover, .import-button:hover {
+    background-color: #27ae60;
+}
+
+
+.results h2 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.2em;
+}
+
+#recognized-char {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #e74c3c;
+    min-height: 45px;
+    margin: 10px 0;
+}
+
+#status-text {
+    font-style: italic;
+    color: #555;
+    min-height: 20px;
+}
+
+.data-collection h3 {
+    margin-top: 0;
+    color: #34495e;
+}
+
+.data-collection input[type="text"] {
+    padding: 8px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 60px;
+    text-align: center;
+    font-size: 1em;
+    text-transform: uppercase;
+}
+
+.note-collection {
+    font-size: 0.85em;
+    color: #555;
+    margin-top: 10px;
+}
+.data-actions {
+    margin-top: 10px;
+}
