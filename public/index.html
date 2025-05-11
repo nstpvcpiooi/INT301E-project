@@ -1,51 +1,278 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASL (Node.js + KNN + MediaPipe)</title>
-    <link rel="stylesheet" href="/style.css"> <!-- Đường dẫn đúng khi dùng Express static -->
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <!-- DaisyUI -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Motion One -->
+    <script src="https://cdn.jsdelivr.net/npm/motion@10.17.0/dist/motion.min.js"></script>
     <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .subtle-gradient {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e6e9ff 100%);
+        }
+        .card-gradient {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%);
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Nhận Diện ASL (Node.js Server)</h1>
-        <p>Sử dụng MediaPipe và KNN. Bạn cần tự thu thập dữ liệu mẫu.</p>
-        <p class="note">Hướng dẫn: Nhấn "Bắt đầu". Thực hiện một cử chỉ ASL (A-Y). Nhập ký tự tương ứng vào ô "Nhãn" rồi nhấn "Lưu Mẫu Này". Lặp lại nhiều lần cho mỗi ký tự.</p>
+<body class="min-h-screen subtle-gradient text-base" x-data="{ 
+    isStarted: false,
+    activeTab: 'recognition'
+}">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="card card-gradient shadow-xl backdrop-blur-sm border border-gray-100">
+            <div class="card-body">
+                <h1 class="card-title text-4xl font-bold text-center text-gray-800 mb-4">ASL Learning Platform</h1>
+                
+                <!-- Tabs -->
+                <div class="tabs tabs-boxed justify-center mb-8">
+                    <a class="tab"
+                       :class="{ 'tab-active': activeTab === 'recognition' }"
+                       :aria-selected="activeTab === 'recognition' ? 'true' : 'false'"
+                       @click="activeTab = 'recognition'">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                        </svg>
+                        Nhận Diện
+                    </a>
+                    <a class="tab"
+                       :class="{ 'tab-active': activeTab === 'dictionary' }"
+                       :aria-selected="activeTab === 'dictionary' ? 'true' : 'false'"
+                       @click="activeTab = 'dictionary'">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+                        </svg>
+                        Từ Điển
+                    </a>
+                    <a class="tab"
+                       :class="{ 'tab-active': activeTab === 'messaging' }"
+                       :aria-selected="activeTab === 'messaging' ? 'true' : 'false'"
+                       @click="activeTab = 'messaging'">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
+                        </svg>
+                        Nhắn Tin
+                    </a>
+                    <a class="tab"
+                       :class="{ 'tab-active': activeTab === 'games' }"
+                       :aria-selected="activeTab === 'games' ? 'true' : 'false'"
+                       @click="activeTab = 'games'">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                        Trò Chơi
+                    </a>
+                </div>
 
-        <div class="video-container">
-            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-            <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
-        </div>
+                <!-- Recognition Tab -->
+                <div x-show="activeTab === 'recognition'">
+                    <p class="text-center text-gray-600 text-xl mb-2">Sử dụng MediaPipe và KNN</p>
+                    <p class="text-center text-gray-500 text-lg italic mb-10">Hướng dẫn: Nhấn "Bắt đầu". Thực hiện một cử chỉ ASL (A-Y). Nhập ký tự tương ứng vào ô "Nhãn" rồi nhấn "Lưu Mẫu Này".</p>
 
-        <div class="controls">
-            <button id="start-button">Bắt đầu</button>
-            <p>Số mẫu dữ liệu đã lưu: <span id="data-count">0</span></p>
-        </div>
+                    <div class="flex justify-center mb-10">
+                        <div class="relative group">
+                            <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-100 to-blue-100 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                            <div class="relative">
+                                <video class="input_video hidden" id="input_video" autoplay playsinline></video>
+                                <canvas class="output_canvas rounded-xl shadow-lg" id="output_canvas" width="480" height="360"></canvas>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="results">
-            <h2>Ký tự nhận diện:</h2>
-            <p id="recognized-char">---</p>
-            <p id="status-text">Nhấn "Bắt đầu" và cho phép webcam.</p>
-        </div>
+                    <div class="flex justify-center items-center gap-8 mb-10">
+                        <button id="start-button" 
+                                class="btn btn-lg bg-indigo-600 hover:bg-indigo-700 text-white border-none text-lg font-medium px-8"
+                                x-on:click="isStarted = !isStarted"
+                                x-text="isStarted ? 'Dừng' : 'Bắt đầu'">
+                            Bắt đầu
+                        </button>
+                        <p class="text-gray-700 text-xl">Số mẫu: <span id="data-count" class="font-semibold">0</span></p>
+                    </div>
 
-        <div class="data-collection">
-            <h3>Công Cụ Thu Thập Dữ Liệu Mẫu</h3>
-            <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
-            <input type="text" id="char-label" maxlength="1" size="3">
-            <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
-            <div class="data-actions">
-                <button id="clear-data-button">Xóa Tất Cả Mẫu Đã Lưu</button>
-                <button id="export-data-button">Xuất Dữ Liệu Mẫu (JSON)</button>
-                <label for="import-file" class="import-button">Nhập Dữ Liệu Mẫu (JSON)</label>
-                <input type="file" id="import-file" accept=".json" style="display: none;">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-semibold text-gray-800 mb-4">Ký tự nhận diện:</h2>
+                        <p id="recognized-char" class="text-7xl font-bold text-indigo-600 mb-4">---</p>
+                        <p id="status-text" class="text-gray-600 text-lg">Nhấn "Bắt đầu" và cho phép webcam.</p>
+                    </div>
+
+                    <div class="card bg-gray-50/80">
+                        <div class="card-body">
+                            <h3 class="card-title text-2xl font-semibold text-gray-800 mb-8">Công Cụ Thu Thập Dữ Liệu</h3>
+                            <div class="flex flex-col sm:flex-row items-center gap-6 mb-10">
+                                <label for="char-label" class="text-gray-700 text-xl">Nhãn chữ cái (A-Y):</label>
+                                <input type="text" id="char-label" maxlength="1" size="3" 
+                                       class="input input-bordered w-24 text-center text-xl bg-white" />
+                                <button id="capture-sample-button" disabled 
+                                        class="btn bg-emerald-600 hover:bg-emerald-700 text-white border-none text-lg font-medium">
+                                    Lưu Mẫu Này
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap gap-4 justify-center">
+                                <button id="clear-data-button" 
+                                        class="btn bg-rose-600 hover:bg-rose-700 text-white border-none text-lg font-medium">
+                                    Xóa Tất Cả Mẫu
+                                </button>
+                                <button id="export-data-button" 
+                                        class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none text-lg font-medium">
+                                    Xuất Dữ Liệu (JSON)
+                                </button>
+                                <label for="import-file" 
+                                       class="btn bg-amber-600 hover:bg-amber-700 text-white border-none text-lg font-medium cursor-pointer">
+                                    Nhập Dữ Liệu (JSON)
+                                </label>
+                                <input type="file" id="import-file" accept=".json" class="hidden" />
+                            </div>
+                            <p class="text-gray-500 italic mt-8 text-center text-lg">
+                                Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dictionary Tab -->
+                <div x-show="activeTab === 'dictionary'" class="space-y-8">
+                    <div class="flex justify-center mb-8">
+                        <div class="form-control w-full max-w-xl">
+                            <div class="input-group">
+                                <input type="text" placeholder="Tìm kiếm từ..." class="input input-bordered w-full text-lg" />
+                                <button class="btn btn-square bg-indigo-600 hover:bg-indigo-700 border-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Sample Dictionary Items -->
+                        <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                            <div class="card-body">
+                                <h3 class="card-title text-xl">Hello</h3>
+                                <p class="text-gray-600 text-lg">Xin chào</p>
+                                <div class="card-actions justify-end">
+                                    <button class="btn btn-sm bg-indigo-600 hover:bg-indigo-700 text-white border-none">Xem Cử Chỉ</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                            <div class="card-body">
+                                <h3 class="card-title text-xl">Thank you</h3>
+                                <p class="text-gray-600 text-lg">Cảm ơn</p>
+                                <div class="card-actions justify-end">
+                                    <button class="btn btn-sm bg-indigo-600 hover:bg-indigo-700 text-white border-none">Xem Cử Chỉ</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                            <div class="card-body">
+                                <h3 class="card-title text-xl">Goodbye</h3>
+                                <p class="text-gray-600 text-lg">Tạm biệt</p>
+                                <div class="card-actions justify-end">
+                                    <button class="btn btn-sm bg-indigo-600 hover:bg-indigo-700 text-white border-none">Xem Cử Chỉ</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messaging Tab -->
+                <div x-show="activeTab === 'messaging'" class="space-y-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-3xl font-semibold text-gray-800">Tin Nhắn</h2>
+                        <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none text-lg font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                            </svg>
+                            Gửi Tin Nhắn Mới
+                        </button>
+                    </div>
+                    <div class="space-y-6">
+                        <!-- Sample Messages -->
+                        <div class="chat chat-start">
+                            <div class="chat-bubble bg-gray-100 text-gray-800 text-lg">Xin chào! Bạn có thể giúp tôi học ASL không?</div>
+                        </div>
+                        <div class="chat chat-end">
+                            <div class="chat-bubble bg-indigo-600 text-white text-lg">Tất nhiên rồi! Tôi rất vui được giúp bạn.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Games Tab -->
+                <div x-show="activeTab === 'games'" class="space-y-8">
+                    <h2 class="text-3xl font-semibold text-gray-800 mb-8">Trò Chơi Học ASL</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Memory Game -->
+                        <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                            <div class="card-body">
+                                <h3 class="card-title text-xl">Trò Chơi Trí Nhớ</h3>
+                                <p class="text-gray-600 text-lg">Ghép các cặp cử chỉ ASL với ý nghĩa của chúng</p>
+                                <div class="card-actions justify-end">
+                                    <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none text-lg font-medium">Chơi Ngay</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Quiz Game -->
+                        <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                            <div class="card-body">
+                                <h3 class="card-title text-xl">Kiểm Tra Kiến Thức</h3>
+                                <p class="text-gray-600 text-lg">Trả lời các câu hỏi về cử chỉ ASL</p>
+                                <div class="card-actions justify-end">
+                                    <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none text-lg font-medium">Bắt Đầu</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Practice Game -->
+                        <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                            <div class="card-body">
+                                <h3 class="card-title text-xl">Luyện Tập Cử Chỉ</h3>
+                                <p class="text-gray-600 text-lg">Thực hành các cử chỉ ASL với hướng dẫn</p>
+                                <div class="card-actions justify-end">
+                                    <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none text-lg font-medium">Bắt Đầu</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Speed Challenge -->
+                        <div class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
+                            <div class="card-body">
+                                <h3 class="card-title text-xl">Thử Thách Tốc Độ</h3>
+                                <p class="text-gray-600 text-lg">Thực hiện cử chỉ ASL trong thời gian giới hạn</p>
+                                <div class="card-actions justify-end">
+                                    <button class="btn bg-indigo-600 hover:bg-indigo-700 text-white border-none text-lg font-medium">Thử Thách</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <p class="note-collection"><em>Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.</em></p>
         </div>
     </div>
-    <script src="/script.js"></script> <!-- Đường dẫn đúng khi dùng Express static -->
+    <script src="/script.js"></script>
 </body>
 </html>
