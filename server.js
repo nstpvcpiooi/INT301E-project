@@ -33,6 +33,10 @@ app.get('/learn', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'learn.html'));
 });
 
+// *** NEW ROUTE for Sign-to-Text ***
+app.get('/sign-to-text', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'sign-to-text.html'));
+});
 
 // Khởi động server
 app.listen(port, () => {
