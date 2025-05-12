@@ -23,7 +23,7 @@ const K_NEIGHBORS = 3; // Số láng giềng cho KNN (có thể thử nghiệm 3
 // DANH SÁCH CÁC CHỮ CÁI ASL (bỏ J, Z vì chúng động)
 const ASL_ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', // Chữ cái (bỏ J, Z) vì kho nhan dien
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-const LOCAL_STORAGE_KEY = 'aslTrainingDataKNN_v1';
+const LOCAL_STORAGE_KEY = 'text';
 
 // --- 1. Khởi Tạo MediaPipe Hands ---
 function initializeMediaPipeHands() {

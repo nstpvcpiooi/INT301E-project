@@ -14,14 +14,10 @@ app.get('/', (req, res) => {
 
 
 // Route cho trang từ điển
-app.get('/dictionary-letter', (req, res) => {
+app.get('/letter', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dictionary.html'));
 });
 
-// Route cho trang từ điển
-app.get('/dictionary-word', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'dictionary-word.html'));
-});
 
 // Route cho trang HANGMAN
 app.get('/hangman', (req, res) => {
@@ -36,6 +32,11 @@ app.get('/learn', (req, res) => {
 // *** NEW ROUTE for Sign-to-Text ***
 app.get('/sign-to-text', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'sign-to-text.html'));
+});
+
+// *** NEW ROUTE for Math Calculator ***
+app.get('/math-calculator', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'math-calculator.html'));
 });
 
 // Khởi động server

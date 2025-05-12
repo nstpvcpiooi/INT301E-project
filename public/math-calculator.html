@@ -3,35 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viết Chữ bằng Thủ Ngữ (Giữ 1s)</title>
+    <title>Máy Tính Thủ Ngữ (Giữ 1s)</title>
     <link rel="stylesheet" href="/style.css">
-    <!-- MediaPipe -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js" integrity="sha512-VWDU4GTj89MFEkKuQS9PdpFSe5w/v7IpNIyDn9ikCEHMJ29lk1+y6Tnm0JZoGK5IIuHpiA1QAEPduOPL9zUpug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <!-- Math.js for safe evaluation -->
+      <!-- *** DI CHUYỂN MATH.JS LÊN TRÊN SCRIPT CỦA BẠN *** -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js" integrity="sha512-VWDU4GTj89MFEkKuQS9PdpFSe5w/v7IpNIyDn9ikCEHMJ29lk1+y6Tnm0JZoGK5IIuHpiA1QAEPduOPL9zUpug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.js" integrity="sha512-VWDU4GTj89MFEkKuQS9PdpFSe5w/v7IpNIyDn9ikCEHMJ29lk1+y6Tnm0JZoGK5IIuHpiA1QAEPduOPL9zUpug==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
-        /* Copy style từ sign-to-text.html nếu cần */
-        .text-output-area { margin-top: 20px; margin-bottom: 20px; }
-        #output-text { width: 95%; min-height: 100px; padding: 10px; font-size: 1.5em; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; white-space: pre-wrap; word-wrap: break-word; text-align: left; }
-        .instructions { margin-top: 15px; font-style: italic; color: #666; }
+        .calculator-display { background-color: #e9ecef; border: 1px solid #ced4da; border-radius: 5px; padding: 15px; margin-bottom: 20px; text-align: right; }
+        #expression-display { min-height: 1.5em; font-size: 1.8em; color: #495057; word-wrap: break-word; margin-bottom: 5px; }
+        #result-display { min-height: 1.5em; font-size: 2.2em; font-weight: bold; color: #28a745; visibility: hidden; /* Hide initially */ }
         .recognition-area { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 20px; border-top: 1px solid #eee; padding-top: 20px; }
         .video-container { position: relative; width: 480px; height: 360px; background-color: #333; }
         .input_video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .output_canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .recognition-controls { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 250px; }
         .recognition-controls h2 { margin-top: 0; font-size: 1.3em; }
-        #recognized-char { font-size: 2.5em; font-weight: bold; color: #28a745; min-height: 1.5em;}
-        #hold-indicator { font-size: 0.9em; color: #007bff; height: 1.2em; /* Giữ chỗ */}
+        #recognized-char { font-size: 2.5em; font-weight: bold; color: #007bff; min-height: 1.5em;}
+        #hold-indicator { font-size: 0.9em; color: #007bff; height: 1.2em; }
+        .instructions { margin-top: 15px; font-style: italic; color: #666; }
     </style>
 </head>
 <body>
-    <div class="container sign-to-text-hold-container">
-        <h1>Viết Chữ bằng Thủ Ngữ (Giữ 1 giây)</h1>
-        <p class="note">Biểu diễn thủ ngữ (A-Y, 0-9) và giữ ổn định trong 1 giây để nhập. Dùng 'Z' để xóa.</p>
+    <div class="container math-calculator-hold-container">
+        <h1>Máy Tính bằng Thủ Ngữ (Giữ 1 giây)</h1>
+        <p class="note">Sử dụng bộ dữ liệu chữ/số hiện có. Giữ ký hiệu (0-9, +, -, *, /, =) trong 1 giây để nhập. Dùng 'Z' (hoặc ký hiệu xóa của bạn) để xóa.</p>
+        <p class="note"><strong>Quan trọng:</strong> Bộ dữ liệu phải được huấn luyện cho các ký hiệu toán học này.</p>
 
-        <div class="text-output-area">
-            <h3>Văn bản của bạn:</h3>
-            <div id="output-text" contenteditable="false"></div>
+        <div class="calculator-display">
+            <div id="expression-display"></div>
+            <div id="result-display"></div>
         </div>
 
         <div class="recognition-area">
@@ -40,17 +46,16 @@
                 <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
             </div>
             <div class="recognition-controls">
-                 <!-- Đổi ID nút để khớp với JS mới -->
                  <button id="start-recognition-button">Bật Nhận Diện</button>
                  <p id="status-text">Nhấn nút trên để bắt đầu.</p>
                  <h2>Đang nhận diện: <span id="recognized-char">---</span></h2>
-                 <p id="hold-indicator"></p> <!-- Hiển thị trạng thái giữ -->
-                 <p class="instructions">Giữ ký hiệu 1 giây để nhập. Dùng 'D' để xóa.</p>
+                 <p id="hold-indicator"></p>
+                 <p class="instructions">Giữ ký hiệu 1 giây để nhập. Dùng '=' để tính, 'Z' để xóa.</p>
             </div>
         </div>
 
         <div class="controls">
-            <button id="clear-text-button">Xóa Toàn Bộ</button>
+            <button id="clear-button">Xóa (Clear)</button>
        </div>
 
        <div class="data-collection">
@@ -66,10 +71,9 @@
             </div>
             <p class="note-collection"><em>Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.</em></p>
         </div>
-        
+
     </div>
-    
-    <!-- Link đến file JS mới -->
-    <script src="/sign-to-text.js"></script>
+    <!-- Đổi tên file JS -->
+    <script src="/math-calculator.js"></script>
 </body>
 </html>
