@@ -21,8 +21,8 @@ let currentLandmarks = null;
 let trainingData = [];
 const K_NEIGHBORS = 5; // From learn.js
 // Renamed VALID_LEARN_CHARS, kept content
-const VALID_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-const BACKSPACE_CHAR = 'D'; // Add backspace character
+const VALID_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '__' ];
+const BACKSPACE_CHAR = '#'; // Add backspace character
 const LOCAL_STORAGE_KEY = 'text'; // From learn.js
 
 // --- Sign-to-Text Hold Logic ---
@@ -195,7 +195,11 @@ function onHandResults(results) {
             } else if (VALID_CHARS.includes(heldChar)) {
                 // --- Process Regular Character ---
                 console.log(`Adding character: ${heldChar}`);
-                currentText += heldChar;
+                if (heldChar == '__') {
+                    currentText += '   '
+                } else {
+                    currentText += heldChar;
+                }
                 updateOutputText(); // Update UI immediately
                 // Reset hold immediately after adding to prevent repeats
                 heldChar = null;

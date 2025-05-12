@@ -24,7 +24,7 @@ const K_NEIGHBORS = 5;
 const LOCAL_STORAGE_KEY = 'math'; // <<<<< Dùng key gốc
 
 // --- Math Calculator Hold Logic (with Letter Mapping) ---
-const VALID_DIGITS_ONLY = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const VALID_DIGITS_ONLY = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '#'];
 
 const SYMBOL_MAP = {
     '+': '+',
@@ -36,7 +36,7 @@ const MAPPED_OPERATOR_LETTERS = Object.keys(SYMBOL_MAP); // ['A', 'S', 'M', 'V']
 const DISPLAY_OPERATORS = Object.values(SYMBOL_MAP);      // ['+', '-', '*', '/']
 
 const EQUALS_LETTER = '='; // Chữ cái ánh xạ cho dấu '='
-const BACKSPACE_LETTER = 'Z'; // Chữ cái cho xóa
+const BACKSPACE_LETTER = '#'; // Chữ cái cho xóa
 
 // Các ký tự hợp lệ có thể được *nhận diện* và *xử lý*
 const RECOGNIZABLE_LETTERS = [...VALID_DIGITS_ONLY, ...MAPPED_OPERATOR_LETTERS, EQUALS_LETTER, BACKSPACE_LETTER];

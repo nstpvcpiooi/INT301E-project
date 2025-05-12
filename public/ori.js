@@ -35,7 +35,7 @@ const MATH_KEY = 'math';
 let currentWorkingKey = ALPHANUMERIC_KEY; // Key mặc định mà dropdown đang chọn để làm việc (thu thập, xóa, xuất)
 
 // DANH SÁCH KÝ TỰ HỢP LỆ (Có thể điều chỉnh động dựa trên currentWorkingKey nếu cần)
-const ASL_ALPHABET_GENERAL = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '='];
+const ASL_ALPHABET_GENERAL = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '-', '*', '/', '=', '#', '__'];
 
 
 // --- 1. Khởi Tạo MediaPipe Hands ---
