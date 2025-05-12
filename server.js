@@ -28,6 +28,12 @@ app.get('/hangman', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'hangman.html'));
 });
 
+// *** NEW ROUTE for Learning Feature ***
+app.get('/learn', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'learn.html'));
+});
+
+
 // Khởi động server
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);
