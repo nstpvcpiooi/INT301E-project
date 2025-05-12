@@ -374,3 +374,190 @@ h1 {
 .feedback-waiting {
     color: #3498db;
 }
+/* --- START OF FILE public/style.css --- */
+body {
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Căn lề trên */
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.container {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 900px; /* Tăng chiều rộng để chứa 2 cột */
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* Xếp chồng các phần tử chính */
+    gap: 20px; /* Khoảng cách giữa các phần tử chính */
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+h2 {
+    color: #555;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+p {
+    color: #666;
+    line-height: 1.6;
+}
+.note {
+    font-size: 0.9em;
+    color: #888;
+    margin-bottom: 15px;
+}
+.note-collection {
+    font-size: 0.8em;
+    color: #aaa;
+    margin-top: 10px;
+}
+
+/* --- Layout cho Hangman --- */
+.hangman-container {
+   /* Kế thừa từ .container */
+}
+
+.game-area {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    display: flex; /* Sắp xếp các phần của game */
+    flex-direction: column; /* Xếp chồng các thông tin game */
+    align-items: center; /* Căn giữa nội dung game */
+    gap: 10px;
+}
+
+.hangman-display p, .word-display p {
+    margin: 5px 0;
+    font-size: 1.1em;
+}
+
+#word-to-guess {
+    font-size: 2em;
+    letter-spacing: 0.3em; /* Khoảng cách giữa các chữ cái/dấu gạch */
+    font-weight: bold;
+    color: #007bff;
+    margin: 15px 0;
+}
+
+#wrong-guesses {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.game-message {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.recognition-area {
+    display: flex; /* Đặt camera và control cạnh nhau */
+    flex-wrap: wrap; /* Cho phép xuống dòng trên màn hình nhỏ */
+    justify-content: center; /* Căn giữa các mục */
+    align-items: flex-start; /* Căn đỉnh */
+    gap: 20px; /* Khoảng cách giữa video và controls */
+    border-top: 1px solid #eee; /* Phân tách với game area */
+    padding-top: 20px;
+}
+
+.video-container {
+    position: relative; /* Cho phép định vị canvas tuyệt đối bên trong */
+    width: 480px; /* Kích thước cố định hoặc dùng max-width */
+    height: 360px;
+    background-color: #333; /* Nền tối cho dễ nhìn */
+}
+
+.input_video {
+    /* display: none; không cần thiết nếu canvas vẽ đè lên */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.output_canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* transform: scaleX(-1); Không cần nếu JS đã xử lý lật */
+}
+
+.recognition-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 250px; /* Đảm bảo đủ rộng cho nút */
+}
+
+.recognition-controls h2 {
+    margin-top: 0;
+    font-size: 1.3em;
+}
+#recognized-char {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #28a745;
+    min-height: 1.5em; /* Giữ không gian dù không có chữ */
+}
+
+.game-controls {
+    border-top: 1px solid #eee; /* Phân tách với recognition area */
+    padding-top: 20px;
+}
+
+
+/* --- Buttons --- */
+button {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#submit-guess-button {
+    background-color: #28a745; /* Màu xanh lá cho submit */
+    min-width: 180px; /* Đảm bảo nút đủ rộng */
+}
+#submit-guess-button:hover:not(:disabled) {
+     background-color: #218838;
+}
+
+#restart-game-button {
+    background-color: #ffc107; /* Màu vàng cho restart */
+    color: #333;
+}
+#restart-game-button:hover {
+    background-color: #e0a800;
+}
+/* --- END OF FILE public/style.css --- */

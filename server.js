@@ -23,6 +23,11 @@ app.get('/dictionary-word', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dictionary-word.html'));
 });
 
+// Route cho trang HANGMAN
+app.get('/hangman', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'hangman.html'));
+});
+
 // Khởi động server
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);

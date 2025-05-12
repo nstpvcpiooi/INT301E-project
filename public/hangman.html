@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman ASL</title>
+    <link rel="stylesheet" href="/style.css"> <!-- Đảm bảo đường dẫn đúng -->
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container hangman-container">
+        <h1>Hangman với Nhận Diện Thủ Ngữ ASL</h1>
+        <p class="note">Sử dụng thủ ngữ (A-Y, 0-9) để đoán chữ. Cần có dữ liệu mẫu đã huấn luyện trước.</p>
+
+        <div class="game-area">
+            <div class="hangman-display">
+                <!-- Có thể thêm hình ảnh hoặc SVG hangman ở đây -->
+                <p>Số lượt đoán sai còn lại: <span id="guesses-left">6</span></p>
+                <p>Các chữ đã đoán sai: <span id="wrong-guesses"></span></p>
+            </div>
+            <div class="word-display">
+                <p id="word-to-guess">_ _ _ _ _</p>
+            </div>
+             <p id="game-status" class="game-message"></p> <!-- Thông báo thắng/thua -->
+        </div>
+
+        <div class="recognition-area">
+            <div class="video-container">
+                <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
+                <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
+            </div>
+            <div class="recognition-controls">
+                 <button id="start-camera-button">Bật Camera & Nhận Diện</button>
+                 <p id="status-text">Nhấn nút trên để bắt đầu.</p>
+                 <h2>Ký tự nhận diện: <span id="recognized-char">---</span></h2>
+                 <button id="submit-guess-button" disabled>Gửi Lượt Đoán</button>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button id="restart-game-button">Chơi Lại</button>
+            <p class="note-collection"><em>Dữ liệu nhận diện được tải từ LocalStorage (khóa: aslTrainingDataKNN_v1). Hãy chắc chắn bạn đã huấn luyện hoặc nhập dữ liệu trước đó.</em></p>
+        </div>
+
+    </div>
+    <script src="/hangman.js"></script> <!-- Sử dụng file JS mới -->
+</body>
+</html>
