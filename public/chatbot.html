@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot with Camera</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <h1>Chatbot with Camera</h1>
+    <div class="recognition-area">
+        <div class="video-container">
+            <video class="input_video" id="video" autoplay playsinline style="display: none;"></video>
+            <canvas class="output_canvas" id="canvas" width="480" height="360"></canvas>
+        </div>
+        <div class="recognition-controls">
+             <button id="startCamera">Bật Camera & Nhận Diện</button>
+             <p id="status-text">Nhấn nút trên để bắt đầu.</p>
+             <h2>Tin nhắn: <span id="recognizedText">---</span></h2>
+             <button id="send-button" disabled>Gửi Lượt Đoán</button>
+             <h2>Tin nhắn: <span id="response">---</span></h2>
+            </div>
+    </div>
+    <script src="./chatbot.js"></script>
+</body>
+</html>

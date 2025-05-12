@@ -39,6 +39,11 @@ app.get('/math-calculator', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'math-calculator.html'));
 });
 
+// realtimee chatbot for ASL
+app.get('/chatbot', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'chatbot.html'));
+});
+
 // Khởi động server
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);
