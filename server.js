@@ -55,6 +55,11 @@ app.get('/chapter/:id', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'chapter-view.html'));
 });
 // --- END OF BOOK READER ROUTES ---
+
+// NEW ROUTE for Menja Game
+app.get('/menja', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'menja', 'index.html'));
+});
 // Khởi động server
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);
