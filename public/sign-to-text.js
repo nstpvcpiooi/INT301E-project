@@ -24,6 +24,8 @@ const K_NEIGHBORS = 5; // From learn.js
 const VALID_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '__' ];
 const BACKSPACE_CHAR = '#'; // Add backspace character
 const LOCAL_STORAGE_KEY = 'text'; // From learn.js
+const SPACE_CHAR = '__'
+const SPACE_SIZE = '   '
 
 // --- Sign-to-Text Hold Logic ---
 let currentText = "";               // New: Stores the output text
@@ -195,8 +197,8 @@ function onHandResults(results) {
             } else if (VALID_CHARS.includes(heldChar)) {
                 // --- Process Regular Character ---
                 console.log(`Adding character: ${heldChar}`);
-                if (heldChar == '__') {
-                    currentText += '   '
+                if (heldChar == SPACE_CHAR) {
+                    currentText += SPACE_SIZE
                 } else {
                     currentText += heldChar;
                 }
