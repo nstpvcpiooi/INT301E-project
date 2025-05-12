@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Sách Truyện</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .comics-section { margin-bottom: 30px; }
+        .comics-section h2 { text-align: left; margin-left: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
+        .comics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsive grid */
+            gap: 20px;
+            padding: 10px;
+        }
+        .comic-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            transition: box-shadow 0.3s ease;
+        }
+        .comic-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .comic-item img {
+            width: 100%;
+            max-width: 150px; /* Max width for thumbnail */
+            height: 200px;  /* Fixed height for thumbnail */
+            object-fit: cover; /* Cover the area, might crop */
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .comic-item .comic-name {
+            font-size: 0.9em;
+            text-align: center;
+            font-weight: bold;
+            height: 40px; /* Ensure space for two lines of text */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+
+        }
+        .comic-item .latest-chapter {
+            font-size: 0.8em;
+            color: #777;
+            margin-top: 5px;
+        }
+        #loading-main, #error-main { text-align: center; font-size: 1.2em; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Khám Phá Truyện Tranh</h1>
+
+        <div id="loading-main">Đang tải danh sách truyện...</div>
+        <div id="error-main" style="display:none; color: red;"></div>
+
+        <div id="comics-container" style="display:none;">
+            <div class="comics-section">
+                <h2>Truyện Mới Cập Nhật</h2>
+                <div id="new-comics-grid" class="comics-grid">
+                    <!-- New comics will be loaded here -->
+                </div>
+            </div>
+
+            <div class="comics-section">
+                <h2>Truyện Hot/Nổi Bật (Ví dụ)</h2>
+                <div id="hot-comics-grid" class="comics-grid">
+                    <!-- Hot comics will be loaded here -->
+                </div>
+            </div>
+        </div>
+        <a href="/" class="button" style="margin-top: 30px; display: inline-block; text-decoration: none;">Quay Về Trang Chủ</a>
+    </div>
+    <script src="/book-listing.js"></script>
+</body>
+</html>

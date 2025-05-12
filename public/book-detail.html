@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Truyện</title>
+    <link rel="stylesheet" href="/style.css"> <!-- Assuming your main style.css -->
+    <style>
+        .book-container { display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .book-info { display: flex; gap: 20px; margin-bottom: 30px; max-width: 800px; }
+        .book-info img { max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .book-text-info { text-align: left; }
+        .book-text-info h1 { margin-top: 0; }
+        .chapters-navigation { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .chapters-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; max-width: 800px; }
+        .chapter-button { padding: 15px; text-align: center; background-color: #e0e0e0; border-radius: 5px; cursor: pointer; transition: background-color 0.3s; text-decoration: none; color: #333; font-size: 1em; }
+        .chapter-button:hover { background-color: #c0c0c0; }
+        .nav-button, .back-button { padding: 10px 20px; font-size: 1.2em; }
+        #loading, #error-message { text-align: center; font-size: 1.2em; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="container"> <!-- Using existing class from your style.css -->
+        <div id="loading">Đang tải chi tiết truyện...</div>
+        <div id="error-message" style="display:none; color: red;"></div>
+
+        <div class="book-container" id="book-content" style="display:none;">
+            <div class="book-info">
+                <img id="book-thumb" src="" alt="Bìa truyện">
+                <div class="book-text-info">
+                    <h1 id="book-name"></h1>
+                    <p id="book-description"></p>
+                </div>
+            </div>
+
+            <h2>Danh sách chương</h2>
+            <div class="chapters-navigation">
+                <button id="prev-chapters" class="nav-button">< Trước</button>
+                <span id="chapter-page-info"></span>
+                <button id="next-chapters" class="nav-button">Sau ></button>
+            </div>
+            <div id="chapters-grid" class="chapters-grid">
+                <!-- Chapters will be loaded here by JavaScript -->
+            </div>
+
+            <button id="back-button" class="back-button" style="margin-top: 30px;">Quay Lại</button>
+        </div>
+    </div>
+    <script src="/book-detail.js"></script>
+</body>
+</html>

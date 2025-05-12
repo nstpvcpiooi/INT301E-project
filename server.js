@@ -1,8 +1,9 @@
+// server.js
 const express = require('express');
-const path = require('path'); // Module path của Node.js để làm việc với đường dẫn file/thư mục
+const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 3000; // Sử dụng cổng môi trường hoặc 3000 mặc định
+const port = process.env.PORT || 3000;
 
 // Phục vụ các file tĩnh từ thư mục 'public'
 app.use(express.static(path.join(__dirname, 'public')));
@@ -12,33 +13,48 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-
 // Route cho trang từ điển
 app.get('/letter', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dictionary.html'));
 });
-
 
 // Route cho trang HANGMAN
 app.get('/hangman', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'hangman.html'));
 });
 
-// *** NEW ROUTE for Learning Feature ***
+// NEW ROUTE for Learning Feature
 app.get('/learn', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'learn.html'));
 });
 
-// *** NEW ROUTE for Sign-to-Text ***
+// NEW ROUTE for Sign-to-Text
 app.get('/sign-to-text', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'sign-to-text.html'));
 });
 
-// *** NEW ROUTE for Math Calculator ***
+// NEW ROUTE for Math Calculator
 app.get('/math-calculator', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'math-calculator.html'));
 });
 
+
+// --- BOOK READER ROUTES ---
+// NEW: Route for Book Listing page
+app.get('/book', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'book-listing.html'));
+});
+
+// Route for Book Detail page (keeps the :slug parameter)
+app.get('/book/:slug', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'book-detail.html'));
+});
+
+// Route for Chapter View page
+app.get('/chapter/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'chapter-view.html'));
+});
+// --- END OF BOOK READER ROUTES ---
 // Khởi động server
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);
