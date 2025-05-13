@@ -848,3 +848,13 @@ html {
     border-color: #007bff;
     outline: none;
 }
+
+button:disabled {
+    opacity: 0.5;
+    background: gray;
+    cursor: not-allowed;
+}
+button:disabled:hover {
+    background: gray;
+    opacity: 0.5;
+}

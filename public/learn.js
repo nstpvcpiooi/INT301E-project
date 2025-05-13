@@ -10,12 +10,12 @@ const startCameraButton = document.getElementById('start-camera-button');
 const wordInputElement = document.getElementById('word-input');
 const useWordButton = document.getElementById('use-word-button');
 const randomWordButton = document.getElementById('random-word-button');
+const cancelWordButton = document.getElementById('cancel-word-button');
 const targetWordDisplayElement = document.getElementById('target-word-display');
 const currentLetterInstructionElement = document.getElementById('current-letter-instruction');
 const currentLetterTargetElement = document.getElementById('current-letter-target');
 const feedbackMessageElement = document.getElementById('feedback-message');
 const completionMessageElement = document.getElementById('completion-message');
-const resetLearnButton = document.getElementById('reset-learn-button');
 
 
 // --- MediaPipe & Camera ---
@@ -179,7 +179,7 @@ function onHandResults(results) {
             prediction = "Lỗi FE"; // Feature Extraction error
         }
     } else {
-        prediction = "Không thấy tay";
+        prediction = "---";
     }
 
     // Cập nhật UI ký tự nhận diện real-time
@@ -234,16 +234,20 @@ function handleLearningRecognition(recognizedLetter) {
                          completionMessageElement.textContent = `🎉 Hoàn thành từ "${targetWord}"!`;
                          currentLetterTargetElement.textContent = '🏆';
                          currentLetterInstructionElement.textContent = "Tuyệt vời!";
-                         // Cân nhắc dừng camera tự động? Hoặc để người dùng tự bấm
-                         // stopRecognition();
-                         // Hoặc chỉ đổi text nút camera
-                          if (recognizing) {
-                              startCameraButton.textContent = "Học Từ Khác (Camera vẫn bật)";
-                          }
-                         // Vô hiệu hóa input khi hoàn thành?
+                         
+                         // Cập nhật nút camera thành "Học Từ Khác"
+                         if (recognizing) {
+                             startCameraButton.innerHTML = '<i class="fas fa-redo" style="margin-right: 10px;"></i>Học Từ Khác';
+                             startCameraButton.onclick = () => {
+                                 resetLearning(); // Gọi hàm reset khi click vào nút
+                             };
+                         }
+                         
+                         // Vô hiệu hóa input khi hoàn thành
                          wordInputElement.disabled = true;
                          useWordButton.disabled = true;
                          randomWordButton.disabled = true;
+                         cancelWordButton.disabled = true;
 
                     } else {
                          // --- Chưa hoàn thành, cập nhật cho ký tự mới ---
@@ -297,6 +301,7 @@ function loadTrainingData() {
          wordInputElement.disabled = true;
          useWordButton.disabled = true;
          randomWordButton.disabled = true;
+         cancelWordButton.disabled = true;
          return false;
     } else {
         statusText.textContent = `Sẵn sàng (${loadedCount} mẫu). Chọn từ và bật camera.`;
@@ -304,6 +309,7 @@ function loadTrainingData() {
         wordInputElement.disabled = false;
         useWordButton.disabled = false;
         randomWordButton.disabled = false;
+        cancelWordButton.disabled = false;
         return true;
     }
 }
@@ -324,7 +330,6 @@ function setTargetWord(word) {
           alert(`Một số ký tự đã bị loại bỏ. Từ sẽ học là: "${validWord}"`);
      }
 
-
     targetWord = validWord;
     currentLetterIndex = 0;
     isLearningActive = false; // Chưa active cho đến khi camera bật và người dùng sẵn sàng
@@ -334,13 +339,16 @@ function setTargetWord(word) {
     completionMessageElement.textContent = ''; // Xóa thông báo hoàn thành cũ
     wordInputElement.value = targetWord; // Cập nhật input nếu từ bị thay đổi
 
-    // Cho phép bật camera (nếu có data)
-     startCameraButton.disabled = (trainingData.length === 0);
-     startCameraButton.textContent = "Bật Camera & Bắt Đầu Học";
-
+    // Cập nhật trạng thái các nút
+    startCameraButton.disabled = false; // Cho phép bật camera khi đã có từ
+    startCameraButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bắt đầu';
+    wordInputElement.disabled = true; // Vô hiệu hóa input khi đã chọn từ
+    useWordButton.disabled = true;
+    randomWordButton.disabled = true;
+    cancelWordButton.disabled = true;
 
     updateLearnUI(); // Cập nhật hiển thị từ và ký tự đầu tiên
-    updateFeedback("Nhấn 'Bật Camera' khi sẵn sàng.", "");
+    updateFeedback("Nhấn 'Bắt đầu' khi sẵn sàng.", "");
 }
 
 function selectRandomWord() {
@@ -419,21 +427,26 @@ function stopRecognition() {
             try { camera.stop(); console.log("Camera stopped."); }
             catch (stopError) { console.error("Error stopping camera:", stopError); }
         }
-        startCameraButton.textContent = "Bật Camera & Bắt Đầu Học";
+        startCameraButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bắt đầu';
         statusText.textContent = "Đã dừng camera.";
         recognizedCharText.textContent = "---";
         currentLandmarks = null;
         currentRecognizedLetter = null;
         lastCorrectRecognitionTime = 0; // Reset hold time
-        startCameraButton.disabled = (trainingData.length === 0); // Chỉ bật lại nếu có data
-        // Kích hoạt lại input/button chọn từ
-        wordInputElement.disabled = false;
+        
+        // Cập nhật trạng thái các nút
+        if (targetWord) {
+            startCameraButton.disabled = false; // Cho phép bật lại camera nếu đang học từ
+        } else {
+            startCameraButton.disabled = true; // Vô hiệu hóa nếu chưa có từ
+        }
+        wordInputElement.disabled = false; // Cho phép nhập từ mới
         useWordButton.disabled = false;
         randomWordButton.disabled = false;
+        cancelWordButton.disabled = false;
 
         updateLearnUI(); // Reset UI về trạng thái chờ
         updateFeedback("Camera đã tắt.", "");
-
      } else {
          console.log("Recognition was not active.");
      }
@@ -475,19 +488,20 @@ startCameraButton.onclick = async () => {
         }
 
         startCameraButton.disabled = true;
-        startCameraButton.textContent = "Đang bật...";
+        startCameraButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 10px;"></i>Đang bật...';
 
         const cameraStarted = await initializeCamera();
 
         if (cameraStarted) {
             recognizing = true;
             isLearningActive = true; // Bắt đầu học khi camera bật
-            startCameraButton.textContent = "Dừng Học & Tắt Camera";
+            startCameraButton.innerHTML = '<i class="fa-solid fa-stop" style="margin-right: 10px;"></i>Dừng';
             startCameraButton.disabled = false;
             // Vô hiệu hóa input khi đang học
             wordInputElement.disabled = true;
             useWordButton.disabled = true;
             randomWordButton.disabled = true;
+            cancelWordButton.disabled = true;
 
             updateLearnUI(); // Cập nhật UI để hiển thị ký tự hiện tại
             updateFeedback("Bắt đầu biểu diễn ký tự!", "");
@@ -496,12 +510,13 @@ startCameraButton.onclick = async () => {
             // Lỗi đã được xử lý trong initializeCamera
             recognizing = false;
             isLearningActive = false;
-            startCameraButton.textContent = "Bật Camera & Bắt Đầu Học";
-            startCameraButton.disabled = (trainingData.length === 0);
-             // Kích hoạt lại input
+            startCameraButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bắt đầu';
+            startCameraButton.disabled = false; // Cho phép thử lại
+            // Kích hoạt lại input
             wordInputElement.disabled = false;
             useWordButton.disabled = false;
             randomWordButton.disabled = false;
+            cancelWordButton.disabled = false;
         }
 
     } else {
@@ -510,17 +525,31 @@ startCameraButton.onclick = async () => {
     }
 };
 
-resetLearnButton.onclick = () => {
+cancelWordButton.onclick = () => {
+    if (recognizing) {
+        if (confirm("Bạn có chắc muốn hủy từ đang học?")) {
+            resetLearning();
+        }
+    } else {
+        resetLearning();
+    }
+};
+
+function resetLearning() {
      console.log("Resetting learning process...");
      stopRecognition(); // Dừng camera nếu đang chạy
      targetWord = '';   // Xóa từ mục tiêu
      isLearningActive = false;
      currentLetterIndex = 0;
      wordInputElement.value = ''; // Xóa input
-     // Kích hoạt lại input/button chọn từ
-     wordInputElement.disabled = (trainingData.length === 0);
-     useWordButton.disabled = (trainingData.length === 0);
-     randomWordButton.disabled = (trainingData.length === 0);
+     
+     // Cập nhật trạng thái các nút
+     startCameraButton.disabled = true; // Disable start button until new word is entered
+     wordInputElement.disabled = false; // Cho phép nhập từ mới
+     useWordButton.disabled = false;
+     randomWordButton.disabled = false;
+     cancelWordButton.disabled = false;
+     
      updateLearnUI(); // Cập nhật UI về trạng thái ban đầu
      updateFeedback("Chọn từ mới để học.", "");
      statusText.textContent = `Sẵn sàng (${trainingData.length} mẫu). Chọn từ và bật camera.`;
@@ -533,13 +562,27 @@ function main() {
     initializeMediaPipeHands(); // Tải MP và data
     // Không setTargetWord ban đầu, đợi người dùng chọn
     updateLearnUI(); // Cập nhật UI ban đầu
-    // Đảm bảo các nút chọn từ bị vô hiệu hóa nếu không có data
+    
+    // Đảm bảo các nút ở trạng thái ban đầu
     if (trainingData.length === 0) {
          wordInputElement.disabled = true;
          useWordButton.disabled = true;
          randomWordButton.disabled = true;
+         cancelWordButton.disabled = true;
+         startCameraButton.disabled = true;
+    } else {
+         startCameraButton.disabled = true; // Disable until word is entered
+         wordInputElement.disabled = false; // Cho phép nhập từ
+         useWordButton.disabled = false;
+         randomWordButton.disabled = false;
+         cancelWordButton.disabled = false;
     }
     console.log("Initialization complete. Waiting for user action.");
+}
+
+function toggleInstructions() {
+    const instructionBox = document.querySelector('.instruction-box');
+    instructionBox.classList.toggle('collapsed');
 }
 
 main();
