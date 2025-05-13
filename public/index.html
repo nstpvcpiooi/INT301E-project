@@ -3,16 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASL Data Management</title> <!-- Đổi tiêu đề cho phù hợp -->
+    <title>ASL Data Management & Comic Reader</title>
     <link rel="stylesheet" href="/style.css">
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        /* Add some basic styling for comic lists */
+        .comic-list-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: left; /* Align section title to left */
+        }
+        .comic-list-section h2 {
+            text-align: center; /* Center the H2 title */
+            margin-bottom: 20px;
+        }
+        .comic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsive grid */
+            gap: 20px;
+            justify-content: center;
+        }
+        .comic-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .comic-item img {
+            max-width: 100%;
+            height: 200px; /* Fixed height for consistency */
+            object-fit: cover; /* Cover the area, might crop */
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .comic-item a {
+            text-decoration: none;
+            color: #337ab7;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .comic-item a:hover {
+            text-decoration: underline;
+        }
+        .loading-comics {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Quản Lý và Thu Thập Dữ Liệu ASL</h1>
-        <p>Sử dụng MediaPipe và KNN.</p>
+        <h1>Quản Lý và Thu Thập Dữ Liệu ASL & Đọc Truyện</h1>
+        <!-- ... your existing ASL content ... -->
 
         <div class="dataset-selector" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
             <label for="dataset-key-select">Bộ dữ liệu đang làm việc (để thu thập, xóa, xuất, nhận diện thử):</label>
@@ -36,7 +84,6 @@
             </div>
         </div>
 
-
         <p class="note">Hướng dẫn: Chọn bộ dữ liệu đang làm việc. Nhấn "Bắt đầu". Thực hiện cử chỉ. Nhập nhãn rồi nhấn "Lưu Mẫu Này".</p>
 
         <div class="video-container">
@@ -58,16 +105,32 @@
         <div class="data-collection">
             <h3>Công Cụ Thu Thập Dữ Liệu (cho bộ đang chọn)</h3>
             <label for="char-label">Nhãn ký tự:</label>
-            <input type="text" id="char-label" maxlength="3" size="5"> <!-- Tăng maxlength nếu cần cho toán tử -->
+            <input type="text" id="char-label" maxlength="3" size="5">
             <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
             <div class="data-actions">
                 <button id="clear-data-button">Xóa Bộ Dữ Liệu Hiện Tại</button>
                 <button id="export-data-button">Xuất Bộ Dữ Liệu Hiện Tại (JSON)</button>
-                <!-- Nút nhập chung đã được tách ra ở trên -->
             </div>
             <p class="note-collection"><em>Lưu ý: Thu thập, Xóa, Xuất sẽ áp dụng cho bộ dữ liệu đang được chọn ở trên.</em></p>
         </div>
+
+        <!-- Inside public/index.html -->
+        <div class="feature-link" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <h2>Đọc Truyện Tranh</h2>
+            <p>Khám phá thế giới truyện tranh hấp dẫn.</p>
+            <a href="/book" class="button" style="text-decoration: none; background-color: #1abc9c; padding: 12px 25px; color: white; display: inline-block; border-radius: 5px; margin-top:10px;">
+                Đến Trang Đọc Truyện
+            </a>
+        </div>
+        <div class="feature-link" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <h2>Chơi Game Menja</h2>
+            <p>Điều khiển lưỡi dao bằng cử chỉ tay!</p>
+            <a href="/menja" class="button" style="/* your button styles */ background-color: #e67e22;">
+                Chơi Menja
+            </a>
+        </div>
     </div>
-    <script src="/ori.js"></script>
+    <script src="/ori.js"></script> <!-- Your existing script -->
+    <script src="/homepage-comics.js"></script> <!-- New script for loading comics -->
 </body>
 </html>
