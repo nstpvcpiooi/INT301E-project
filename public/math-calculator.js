@@ -589,7 +589,10 @@ clearButton.onclick = () => {
     clearCalculation();
 };
 
-
+function toggleInstructions() {
+    const instructionBox = document.querySelector('.instruction-box');
+    instructionBox.classList.toggle('collapsed');
+}
 
 // --- 10. Initialization ---
 function main() {
