@@ -8,22 +8,33 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="./chatbot.css">
 </head>
 <body>
     <h1>Chatbot with Camera</h1>
     <div class="recognition-area">
+        <!-- Camera and Canvas -->
         <div class="video-container">
             <video class="input_video" id="video" autoplay playsinline style="display: none;"></video>
             <canvas class="output_canvas" id="canvas" width="480" height="360"></canvas>
         </div>
+
+        <!-- Recognition Controls -->
         <div class="recognition-controls">
-             <button id="startCamera">Bật Camera & Nhận Diện</button>
-             <p id="status-text">Nhấn nút trên để bắt đầu.</p>
-             <h2>Tin nhắn: <span id="recognizedText">---</span></h2>
-             <button id="send-button" disabled>Gửi Lượt Đoán</button>
-             <h2>Tin nhắn: <span id="response">---</span></h2>
-            </div>
+            <button id="startCamera">Bật Camera & Nhận Diện</button>
+            <p id="status-text">Nhấn nút trên để bắt đầu.</p>
+            <h2>Ký tự hiện tại: <span id="recognized-char">---</span></h2>
+            <h2>Tin nhắn hiện tại: <span id="recognizedText">---</span></h2>
+            <button id="send-button" disabled>Gửi</button>
+        </div>
+
+        <!-- Bot Response -->
+        <div id="response">
+            <strong>Phản hồi từ bot:</strong> 
+            <p>---</p>
+        </div>
     </div>
-    <script src="./chatbot.js"></script>
+    <script src="./config.js"></script>
+    <script type="module" src="./chatbot.js"></script>
 </body>
 </html>
