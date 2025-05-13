@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Học Từ bằng Thủ Ngữ</title>
-    <link rel="stylesheet" href="/style.css"> <!-- Sử dụng CSS chung -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
@@ -17,7 +21,7 @@
             margin-bottom: 20px;
             border-radius: 5px;
             background-color: #f9f9f9;
-            min-height: 150px; /* Đủ chỗ cho các dòng chữ */
+            min-height: 150px;
         }
         #target-word-display span {
             font-size: 2.5em;
@@ -31,9 +35,9 @@
             background-color: #007bff;
             color: white;
         }
-         #target-word-display span.done-letter {
-            background-color: #d4edda; /* Màu xanh lá nhạt */
-            color: #155724; /* Màu xanh lá đậm */
+        #target-word-display span.done-letter {
+            background-color: #d4edda;
+            color: #155724;
             text-decoration: line-through;
         }
         #current-letter-instruction {
@@ -46,12 +50,12 @@
             font-weight: bold;
             color: #007bff;
             margin: 10px 0;
-            min-height: 1.5em; /* Giữ chỗ */
+            min-height: 1.5em;
         }
         #feedback-message {
             font-size: 1.5em;
             font-weight: bold;
-            min-height: 1.5em; /* Giữ chỗ */
+            min-height: 1.5em;
             margin-top: 15px;
         }
         .feedback-correct {
@@ -72,83 +76,175 @@
             gap: 10px;
             align-items: center;
             justify-content: center;
-            flex-wrap: wrap; /* Cho phép xuống dòng */
+            flex-wrap: wrap;
         }
-         .word-input-area input[type="text"] {
+        .word-input-area input[type="text"] {
             padding: 8px 12px;
             font-size: 1em;
             border: 1px solid #ccc;
             border-radius: 4px;
             min-width: 200px;
-         }
-         .word-input-area button {
-            padding: 9px 15px; /* Điều chỉnh padding cho cân đối */
-         }
-
-         /* Giữ nguyên layout camera từ hangman */
-        .recognition-area { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 20px; border-top: 1px solid #eee; padding-top: 20px; }
-        .video-container { position: relative; width: 480px; height: 360px; background-color: #333; }
-        .input_video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .output_canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .recognition-controls { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 250px; }
-        .recognition-controls h2 { margin-top: 0; font-size: 1.3em; }
-        #recognized-char { font-size: 2.5em; font-weight: bold; color: #28a745; min-height: 1.5em;}
-
+        }
+        .word-input-area button {
+            padding: 9px 15px;
+        }
+        .recognition-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .video-container {
+            position: relative;
+            width: 480px;
+            height: 360px;
+            background-color: #333;
+        }
+        .input_video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .output_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .recognition-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+        }
+        .recognition-controls h2 {
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+        #recognized-char {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #28a745;
+            min-height: 1.5em;
+        }
     </style>
 </head>
 <body>
-    <div class="container learn-container">
-        <h1>Học Từ bằng Thủ Ngữ ASL</h1>
-        <p class="note">Nhập một từ (chỉ A-Y, 0-9) hoặc chọn từ ngẫu nhiên. Sau đó dùng thủ ngữ để biểu diễn từng ký tự.</p>
-
-        <div class="word-input-area">
-            <input type="text" id="word-input" placeholder="Nhập từ bạn muốn học...">
-            <button id="use-word-button">Học Từ Này</button>
-            <button id="random-word-button">Chọn Từ Ngẫu Nhiên</button>
-        </div>
-
-        <div class="learning-area">
-            <h3>Từ đang học:</h3>
-            <p id="target-word-display">---</p> <!-- Hiển thị từ với highlight -->
-            <p id="current-letter-instruction">Biểu diễn ký tự:</p>
-            <div id="current-letter-target">?</div> <!-- Ký tự cần làm -->
-            <p id="feedback-message"></p> <!-- Feedback đúng/sai -->
-            <p id="completion-message"></p> <!-- Thông báo hoàn thành -->
-        </div>
-
-
-        <div class="recognition-area">
-            <div class="video-container">
-                <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-                <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-hands-sign-language"></i>
+                <span>SignLearn</span>
             </div>
-            <div class="recognition-controls">
-                 <button id="start-camera-button">Bật Camera & Bắt Đầu Học</button>
-                 <p id="status-text">Nhấn nút trên để bắt đầu.</p>
-                 <h2>Đang nhận diện: <span id="recognized-char">---</span></h2>
-                 <!-- Không cần nút submit ở đây -->
+            <ul class="nav-links">
+                <li>
+                    <a href="/">
+                        <i class="fas fa-house"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/letter">
+                        <i class="fas fa-book-open"></i>
+                        <span>Dictionary</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/sign-to-text">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="/learn">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Learn</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/math-calculator">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculator</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/hangman">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Game</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav-links nav-bottom">
+                <li>
+                    <a href="/settings">
+                        <i class="fas fa-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="welcome-section">
+                <h1>Học Từ bằng Thủ Ngữ ASL</h1>
+                <p>Nhập một từ (chỉ A-Y, 0-9) hoặc chọn từ ngẫu nhiên. Sau đó dùng thủ ngữ để biểu diễn từng ký tự.</p>
             </div>
-        </div>
 
-        <div class="controls">
-             <button id="reset-learn-button">Học Từ Khác</button>
-        </div>
-
-        <div class="data-collection">
-            <h3>Công Cụ Thu Thập Dữ Liệu Mẫu</h3>
-            <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
-            <input type="text" id="char-label" maxlength="1" size="3">
-            <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
-            <div class="data-actions">
-                <button id="clear-data-button">Xóa Tất Cả Mẫu Đã Lưu</button>
-                <button id="export-data-button">Xuất Dữ Liệu Mẫu (JSON)</button>
-                <label for="import-file" class="import-button">Nhập Dữ Liệu Mẫu (JSON)</label>
-                <input type="file" id="import-file" accept=".json" style="display: none;">
+            <div class="word-input-area">
+                <input type="text" id="word-input" placeholder="Nhập từ bạn muốn học...">
+                <button id="use-word-button">Học Từ Này</button>
+                <button id="random-word-button">Chọn Từ Ngẫu Nhiên</button>
             </div>
-            <p class="note-collection"><em>Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.</em></p>
-        </div>
 
+            <div class="learning-area">
+                <h3>Từ đang học:</h3>
+                <p id="target-word-display">---</p>
+                <p id="current-letter-instruction">Biểu diễn ký tự:</p>
+                <div id="current-letter-target">?</div>
+                <p id="feedback-message"></p>
+                <p id="completion-message"></p>
+            </div>
+
+            <div class="recognition-area">
+                <div class="video-container">
+                    <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
+                    <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
+                </div>
+                <div class="recognition-controls">
+                    <button id="start-camera-button">Bật Camera & Bắt Đầu Học</button>
+                    <p id="status-text">Nhấn nút trên để bắt đầu.</p>
+                    <h2>Đang nhận diện: <span id="recognized-char">---</span></h2>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="reset-learn-button">Học Từ Khác</button>
+            </div>
+
+            <div class="data-collection">
+                <h3>Công Cụ Thu Thập Dữ Liệu Mẫu</h3>
+                <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
+                <input type="text" id="char-label" maxlength="1" size="3">
+                <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
+                <div class="data-actions">
+                    <button id="clear-data-button">Xóa Tất Cả Mẫu Đã Lưu</button>
+                    <button id="export-data-button">Xuất Dữ Liệu Mẫu (JSON)</button>
+                    <label for="import-file" class="import-button">Nhập Dữ Liệu Mẫu (JSON)</label>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+                <p class="note-collection"><em>Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.</em></p>
+            </div>
+        </main>
     </div>
-    <script src="/learn.js"></script> <!-- File JS mới cho tính năng này -->
+    <script src="/learn.js"></script>
 </body>
 </html>

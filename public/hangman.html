@@ -4,62 +4,296 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hangman ASL</title>
-    <link rel="stylesheet" href="/style.css"> <!-- Đảm bảo đường dẫn đúng -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        .game-area {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hangman-display {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .word-display {
+            font-size: 2em;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 0.2em;
+            margin: 20px 0;
+            color: #212529;
+        }
+
+        .game-message {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .game-message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .game-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .recognition-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .video-container {
+            position: relative;
+            width: 480px;
+            height: 360px;
+            background-color: #212529;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .input_video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .output_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .recognition-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            min-width: 280px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .recognition-controls h2 {
+            margin: 0;
+            font-size: 1.4em;
+            color: #212529;
+        }
+
+        #recognized-char {
+            font-size: 3em;
+            font-weight: bold;
+            color: #28a745;
+            min-height: 1.5em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .game-controls button {
+            padding: 12px 24px;
+            font-size: 1.1em;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #start-camera-button {
+            background-color: #28a745;
+            color: white;
+        }
+
+        #start-camera-button:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+
+        #submit-guess-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #submit-guess-button:hover:not(:disabled) {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        #submit-guess-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        #restart-game-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #restart-game-button:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .note-collection {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            color: #495057;
+            font-style: italic;
+            border-left: 4px solid #007bff;
+        }
+    </style>
 </head>
 <body>
-    <div class="container hangman-container">
-        <h1>Hangman với Nhận Diện Thủ Ngữ ASL</h1>
-        <p class="note">Sử dụng thủ ngữ (A-Y, 0-9) để đoán chữ. Cần có dữ liệu mẫu đã huấn luyện trước.</p>
-
-        <div class="game-area">
-            <div class="hangman-display">
-                <!-- Có thể thêm hình ảnh hoặc SVG hangman ở đây -->
-                <p>Số lượt đoán sai còn lại: <span id="guesses-left">6</span></p>
-                <p>Các chữ đã đoán sai: <span id="wrong-guesses"></span></p>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-hands-sign-language"></i>
+                <span>SignLearn</span>
             </div>
-            <div class="word-display">
-                <p id="word-to-guess">_ _ _ _ _</p>
-            </div>
-             <p id="game-status" class="game-message"></p> <!-- Thông báo thắng/thua -->
-        </div>
+            <ul class="nav-links">
+                <li>
+                    <a href="/">
+                        <i class="fas fa-house"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/letter">
+                        <i class="fas fa-book-open"></i>
+                        <span>Dictionary</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/sign-to-text">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/learn">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Learn</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/math-calculator">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculator</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="/hangman">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Game</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav-links nav-bottom">
+                <li>
+                    <a href="/settings">
+                        <i class="fas fa-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-        <div class="recognition-area">
-            <div class="video-container">
-                <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-                <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="welcome-section">
+                <h1>Hangman với Nhận Diện Thủ Ngữ ASL</h1>
+                <p>Sử dụng thủ ngữ (A-Y, 0-9) để đoán chữ. Cần có dữ liệu mẫu đã huấn luyện trước.</p>
             </div>
-            <div class="recognition-controls">
-                 <button id="start-camera-button">Bật Camera & Nhận Diện</button>
-                 <p id="status-text">Nhấn nút trên để bắt đầu.</p>
-                 <h2>Ký tự nhận diện: <span id="recognized-char">---</span></h2>
-                 <button id="submit-guess-button" disabled>Gửi Lượt Đoán</button>
+
+            <div class="game-area">
+                <div class="hangman-display">
+                    <p>Số lượt đoán sai còn lại: <span id="guesses-left">6</span></p>
+                    <p>Các chữ đã đoán sai: <span id="wrong-guesses"></span></p>
+                </div>
+                <div class="word-display">
+                    <p id="word-to-guess">_ _ _ _ _</p>
+                </div>
+                <p id="game-status" class="game-message"></p>
             </div>
-        </div>
 
-        <div class="game-controls">
-            <button id="restart-game-button">Chơi Lại</button>
-            <p class="note-collection"><em>Dữ liệu nhận diện được tải từ LocalStorage (khóa: aslTrainingDataKNN_v1). Hãy chắc chắn bạn đã huấn luyện hoặc nhập dữ liệu trước đó.</em></p>
-        </div>
-
-        <div class="data-collection">
-            <h3>Công Cụ Thu Thập Dữ Liệu Mẫu</h3>
-            <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
-            <input type="text" id="char-label" maxlength="1" size="3">
-            <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
-            <div class="data-actions">
-                <button id="clear-data-button">Xóa Tất Cả Mẫu Đã Lưu</button>
-                <button id="export-data-button">Xuất Dữ Liệu Mẫu (JSON)</button>
-                <label for="import-file" class="import-button">Nhập Dữ Liệu Mẫu (JSON)</label>
-                <input type="file" id="import-file" accept=".json" style="display: none;">
+            <div class="recognition-area">
+                <div class="video-container">
+                    <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
+                    <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
+                </div>
+                <div class="recognition-controls">
+                    <button id="start-camera-button">Bật Camera & Nhận Diện</button>
+                    <p id="status-text">Nhấn nút trên để bắt đầu.</p>
+                    <h2>Ký tự nhận diện: <span id="recognized-char">---</span></h2>
+                    <button id="submit-guess-button" disabled>Gửi Lượt Đoán</button>
+                </div>
             </div>
-            <p class="note-collection"><em>Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.</em></p>
-        </div>
 
+            <div class="game-controls">
+                <button id="restart-game-button">Chơi Lại</button>
+                <p class="note-collection">Dữ liệu nhận diện được tải từ LocalStorage (khóa: aslTrainingDataKNN_v1). Hãy chắc chắn bạn đã huấn luyện hoặc nhập dữ liệu trước đó.</p>
+            </div>
+
+            <div class="data-collection">
+                <h3>Công Cụ Thu Thập Dữ Liệu Mẫu</h3>
+                <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
+                <input type="text" id="char-label" maxlength="1" size="3">
+                <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
+                <div class="data-actions">
+                    <button id="clear-data-button">Xóa Tất Cả Mẫu Đã Lưu</button>
+                    <button id="export-data-button">Xuất Dữ Liệu Mẫu (JSON)</button>
+                    <label for="import-file" class="import-button">Nhập Dữ Liệu Mẫu (JSON)</label>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+                <p class="note-collection">Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.</p>
+            </div>
+        </main>
     </div>
-    <script src="/hangman.js"></script> <!-- Sử dụng file JS mới -->
+    <script src="/hangman.js"></script>
 </body>
 </html>

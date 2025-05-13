@@ -1,12 +1,172 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASL Data Management</title> <!-- Đổi tiêu đề cho phù hợp -->
-    <link rel="stylesheet" href="/style.css">
+    <title>Sign Language Learning Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-<P>Hello</P>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-hands-sign-language"></i>
+                <span>SignLearn</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active">
+                    <a href="/">
+                        <i class="fas fa-house"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/letter">
+                        <i class="fas fa-book-open"></i>
+                        <span>Dictionary</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/sign-to-text">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/learn">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Learn</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/math-calculator">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculator</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/hangman">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Game</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav-links nav-bottom">
+                <li>
+                    <a href="/settings">
+                        <i class="fas fa-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="welcome-section">
+                <h1>Welcome to SignLearn</h1>
+                <p>Your comprehensive platform for learning sign language</p>
+            </div>
+
+            <!-- Introduction Section -->
+            <section class="content-section">
+                <h2>Giới thiệu về Ngôn ngữ Ký hiệu</h2>
+                <div class="content-grid">
+                    <div class="content-card">
+                        <i class="fas fa-history"></i>
+                        <h3>Lịch sử</h3>
+                        <p>Ngôn ngữ ký hiệu đã phát triển qua nhiều thế kỷ, là phương tiện giao tiếp quan trọng trong cộng đồng người khiếm thính.</p>
+                    </div>
+                    <div class="content-card">
+                        <i class="fas fa-globe"></i>
+                        <h3>Tầm quan trọng</h3>
+                        <p>Ngôn ngữ ký hiệu không chỉ là công cụ giao tiếp mà còn là một phần quan trọng của văn hóa và bản sắc cộng đồng.</p>
+                    </div>
+                    <div class="content-card">
+                        <i class="fas fa-brain"></i>
+                        <h3>Lợi ích</h3>
+                        <p>Học ngôn ngữ ký hiệu giúp phát triển kỹ năng giao tiếp, tăng cường nhận thức và thúc đẩy sự hòa nhập xã hội.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Learning Guide Section -->
+            <section class="content-section">
+                <h2>Hướng dẫn học Ngôn ngữ Ký hiệu</h2>
+                <div class="content-grid">
+                    <div class="content-card">
+                        <i class="fas fa-hand-point-up"></i>
+                        <h3>Cử chỉ cơ bản</h3>
+                        <p>Học các cử chỉ cơ bản và cách thể hiện chúng một cách chính xác.</p>
+                    </div>
+                    <div class="content-card">
+                        <i class="fas fa-comments"></i>
+                        <h3>Giao tiếp</h3>
+                        <p>Thực hành các tình huống giao tiếp hàng ngày bằng ngôn ngữ ký hiệu.</p>
+                    </div>
+                    <div class="content-card">
+                        <i class="fas fa-book"></i>
+                        <h3>Từ vựng</h3>
+                        <p>Xây dựng vốn từ vựng phong phú thông qua các bài học tương tác.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Links -->
+            <section class="content-section">
+                <h2>Bắt đầu học ngay</h2>
+                <div class="quick-links">
+                    <a href="/letter" class="quick-link-card">
+                        <i class="fas fa-book-open"></i>
+                        <span>Bảng chữ cái</span>
+                    </a>
+                    <a href="/learn" class="quick-link-card">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Khóa học cơ bản</span>
+                    </a>
+                    <a href="/sign-to-text" class="quick-link-card">
+                        <i class="fas fa-language"></i>
+                        <span>Dịch ký hiệu</span>
+                    </a>
+                    <a href="/hangman" class="quick-link-card">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Trò chơi học tập</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="content-section">
+                <h2>Tính năng nổi bật</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Dictionary</h3>
+                        <p>Khám phá từ điển ngôn ngữ ký hiệu toàn diện với hướng dẫn chi tiết về cử chỉ và ý nghĩa</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-language"></i>
+                        <h3>Translate</h3>
+                        <p>Chuyển đổi ngôn ngữ ký hiệu thành văn bản trong thời gian thực bằng công nghệ theo dõi tay tiên tiến</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3>Learn</h3>
+                        <p>Học tập tương tác và hướng dẫn được thiết kế để giúp bạn thành thạo ngôn ngữ ký hiệu</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-calculator"></i>
+                        <h3>Calculator</h3>
+                        <p>Thực hành các khái niệm toán học bằng ngôn ngữ ký hiệu với máy tính tương tác</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 </body>
 </html>

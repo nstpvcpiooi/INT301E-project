@@ -3,70 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASL Data Management</title> <!-- Đổi tiêu đề cho phù hợp -->
-    <link rel="stylesheet" href="/style.css">
+    <title>ASL Data Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        .dataset-selector {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .dataset-selector select {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            background-color: white;
+            margin-top: 10px;
+        }
+
+        .data-import-area {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .data-import-area h4 {
+            color: #212529;
+            margin-bottom: 15px;
+        }
+
+        .import-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .import-button:hover {
+            background-color: #5a6268;
+        }
+
+        .video-container {
+            position: relative;
+            width: 480px;
+            height: 360px;
+            background-color: #212529;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 20px auto;
+        }
+
+        .input_video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .output_canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .controls button {
+            padding: 12px 24px;
+            font-size: 1.1em;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background-color: #28a745;
+            color: white;
+        }
+
+        .controls button:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+
+        .results {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .results h2 {
+            color: #212529;
+            margin-bottom: 15px;
+        }
+
+        #recognized-char {
+            font-size: 3em;
+            font-weight: bold;
+            color: #28a745;
+            min-height: 1.5em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .data-collection {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .data-collection h3 {
+            color: #212529;
+            margin-bottom: 15px;
+        }
+
+        .data-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .data-actions button {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #capture-sample-button {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        #capture-sample-button:hover:not(:disabled) {
+            background-color: #138496;
+        }
+
+        #capture-sample-button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .note {
+            margin: 15px 0;
+            padding: 10px 15px;
+            background-color: #e9ecef;
+            border-radius: 6px;
+            color: #495057;
+            border-left: 4px solid #007bff;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Quản Lý và Thu Thập Dữ Liệu ASL</h1>
-        <p>Sử dụng MediaPipe và KNN.</p>
-
-        <div class="dataset-selector" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-            <label for="dataset-key-select">Bộ dữ liệu đang làm việc (để thu thập, xóa, xuất, nhận diện thử):</label>
-            <select id="dataset-key-select">
-                <option value="aslAlphanumericData_v1" selected>Dữ liệu Chữ/Số (Mặc định)</option>
-                <option value="aslMathData_v1">Dữ liệu Toán học</option>
-            </select>
-        </div>
-
-        <div class="data-import-area" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-            <h4>Nhập Dữ Liệu:</h4>
-            <div>
-                <label for="import-alphanumeric-file" class="import-button">Nhập Dữ liệu Chữ/Số (JSON)</label>
-                <input type="file" id="import-alphanumeric-file" accept=".json" style="display: none;">
-                <span style="font-size: 0.8em;">(Sẽ lưu vào key: aslAlphanumericData_v1)</span>
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-hands-sign-language"></i>
+                <span>SignLearn</span>
             </div>
-            <div style="margin-top: 10px;">
-                <label for="import-math-file" class="import-button">Nhập Dữ liệu Toán học (JSON)</label>
-                <input type="file" id="import-math-file" accept=".json" style="display: none;">
-                <span style="font-size: 0.8em;">(Sẽ lưu vào key: aslMathData_v1)</span>
+            <ul class="nav-links">
+                <li>
+                    <a href="/">
+                        <i class="fas fa-house"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/letter">
+                        <i class="fas fa-book-open"></i>
+                        <span>Dictionary</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/sign-to-text">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/learn">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Learn</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/math-calculator">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculator</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/hangman">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Game</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav-links nav-bottom">
+                <li class="active">
+                    <a href="/settings">
+                        <i class="fas fa-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="welcome-section">
+                <h1>Quản Lý và Thu Thập Dữ Liệu ASL</h1>
+                <p>Sử dụng MediaPipe và KNN.</p>
             </div>
-        </div>
 
-
-        <p class="note">Hướng dẫn: Chọn bộ dữ liệu đang làm việc. Nhấn "Bắt đầu". Thực hiện cử chỉ. Nhập nhãn rồi nhấn "Lưu Mẫu Này".</p>
-
-        <div class="video-container">
-            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-            <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
-        </div>
-
-        <div class="controls">
-            <button id="start-button">Bắt đầu Camera</button>
-             <p>Số mẫu trong bộ (<span id="current-dataset-key-display">Chữ/Số</span>): <span id="data-count">0</span></p>
-        </div>
-
-        <div class="results">
-            <h2>Ký tự nhận diện (từ bộ đang chọn):</h2>
-            <p id="recognized-char">---</p>
-            <p id="status-text">Chọn bộ dữ liệu và nhấn "Bắt đầu Camera".</p>
-        </div>
-
-        <div class="data-collection">
-            <h3>Công Cụ Thu Thập Dữ Liệu (cho bộ đang chọn)</h3>
-            <label for="char-label">Nhãn ký tự:</label>
-            <input type="text" id="char-label" maxlength="3" size="5"> <!-- Tăng maxlength nếu cần cho toán tử -->
-            <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
-            <div class="data-actions">
-                <button id="clear-data-button">Xóa Bộ Dữ Liệu Hiện Tại</button>
-                <button id="export-data-button">Xuất Bộ Dữ Liệu Hiện Tại (JSON)</button>
-                <!-- Nút nhập chung đã được tách ra ở trên -->
+            <div class="dataset-selector">
+                <label for="dataset-key-select">Bộ dữ liệu đang làm việc (để thu thập, xóa, xuất, nhận diện thử):</label>
+                <select id="dataset-key-select">
+                    <option value="aslAlphanumericData_v1" selected>Dữ liệu Chữ/Số (Mặc định)</option>
+                    <option value="aslMathData_v1">Dữ liệu Toán học</option>
+                </select>
             </div>
-            <p class="note-collection"><em>Lưu ý: Thu thập, Xóa, Xuất sẽ áp dụng cho bộ dữ liệu đang được chọn ở trên.</em></p>
-        </div>
+
+            <div class="data-import-area">
+                <h4>Nhập Dữ Liệu:</h4>
+                <div>
+                    <label for="import-alphanumeric-file" class="import-button">Nhập Dữ liệu Chữ/Số (JSON)</label>
+                    <input type="file" id="import-alphanumeric-file" accept=".json" style="display: none;">
+                    <span style="font-size: 0.8em;">(Sẽ lưu vào key: aslAlphanumericData_v1)</span>
+                </div>
+                <div style="margin-top: 10px;">
+                    <label for="import-math-file" class="import-button">Nhập Dữ liệu Toán học (JSON)</label>
+                    <input type="file" id="import-math-file" accept=".json" style="display: none;">
+                    <span style="font-size: 0.8em;">(Sẽ lưu vào key: aslMathData_v1)</span>
+                </div>
+            </div>
+
+            <div class="note">
+                Hướng dẫn: Chọn bộ dữ liệu đang làm việc. Nhấn "Bắt đầu". Thực hiện cử chỉ. Nhập nhãn rồi nhấn "Lưu Mẫu Này".
+            </div>
+
+            <div class="video-container">
+                <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
+                <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
+            </div>
+
+            <div class="controls">
+                <button id="start-button">Bắt đầu Camera</button>
+                <p>Số mẫu trong bộ (<span id="current-dataset-key-display">Chữ/Số</span>): <span id="data-count">0</span></p>
+            </div>
+
+            <div class="results">
+                <h2>Ký tự nhận diện (từ bộ đang chọn):</h2>
+                <p id="recognized-char">---</p>
+                <p id="status-text">Chọn bộ dữ liệu và nhấn "Bắt đầu Camera".</p>
+            </div>
+
+            <div class="data-collection">
+                <h3>Công Cụ Thu Thập Dữ Liệu (cho bộ đang chọn)</h3>
+                <label for="char-label">Nhãn ký tự:</label>
+                <input type="text" id="char-label" maxlength="3" size="5">
+                <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
+                <div class="data-actions">
+                    <button id="clear-data-button">Xóa Bộ Dữ Liệu Hiện Tại</button>
+                    <button id="export-data-button">Xuất Bộ Dữ Liệu Hiện Tại (JSON)</button>
+                </div>
+                <p class="note">Lưu ý: Thu thập, Xóa, Xuất sẽ áp dụng cho bộ dữ liệu đang được chọn ở trên.</p>
+            </div>
+        </main>
     </div>
     <script src="/ori.js"></script>
 </body>
