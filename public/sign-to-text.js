@@ -21,11 +21,9 @@ let currentLandmarks = null;
 let trainingData = [];
 const K_NEIGHBORS = 5; // From learn.js
 // Renamed VALID_LEARN_CHARS, kept content
-const VALID_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '__' ];
-const BACKSPACE_CHAR = '#'; // Add backspace character
-const LOCAL_STORAGE_KEY = 'text'; // From learn.js
-const SPACE_CHAR = '__'
-const SPACE_SIZE = '   '
+const VALID_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const BACKSPACE_CHAR = 'D'; // Add backspace character
+const LOCAL_STORAGE_KEY = 'aslTrainingDataKNN_v1'; // From learn.js
 
 // --- Sign-to-Text Hold Logic ---
 let currentText = "";               // New: Stores the output text
@@ -34,8 +32,6 @@ let holdStartTime = 0;              // New: Timestamp when hold started
 const HOLD_DURATION_MS = 1000;      // New: Hold duration (1 second)
 let isProcessingHold = false;      // New: Flag to prevent processing the same hold multiple times
 let isBackspaceTriggeredOnHold = false; // New: Flag specific for backspace hold
-
-
 
 // --- 1. Initialize MediaPipe Hands (Identical to learn.js) ---
 function initializeMediaPipeHands() {
@@ -197,11 +193,7 @@ function onHandResults(results) {
             } else if (VALID_CHARS.includes(heldChar)) {
                 // --- Process Regular Character ---
                 console.log(`Adding character: ${heldChar}`);
-                if (heldChar == SPACE_CHAR) {
-                    currentText += SPACE_SIZE
-                } else {
-                    currentText += heldChar;
-                }
+                currentText += heldChar;
                 updateOutputText(); // Update UI immediately
                 // Reset hold immediately after adding to prevent repeats
                 heldChar = null;

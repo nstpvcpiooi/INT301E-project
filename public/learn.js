@@ -29,7 +29,7 @@ let trainingData = [];
 const K_NEIGHBORS = 5; // Có thể điều chỉnh
 // DANH SÁCH CÁC KÝ TỰ HỢP LỆ CHO TỪ (Có thể bỏ số nếu chỉ muốn học chữ)
 const VALID_LEARN_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-const LOCAL_STORAGE_KEY = 'text'; // Dùng chung data đã huấn luyện
+const LOCAL_STORAGE_KEY = 'aslTrainingDataKNN_v1'; // Dùng chung data đã huấn luyện
 let currentRecognizedLetter = null; // Ký tự đang nhận diện được
 
 // --- Learning Logic ---

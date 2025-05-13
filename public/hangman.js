@@ -31,7 +31,7 @@ let currentLandmarks = null; // Vẫn cần để trích xuất đặc trưng
 let trainingData = []; // { features: [...], label: 'A' }
 const K_NEIGHBORS = 5; // Có thể điều chỉnh
 const ASL_ALPHABET_VALID = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; // Các ký tự hợp lệ cho game
-const LOCAL_STORAGE_KEY = 'text'; // Giữ nguyên key để load data cũ
+const LOCAL_STORAGE_KEY = 'aslTrainingDataKNN_v1'; // Giữ nguyên key để load data cũ
 let currentRecognizedLetter = null; // Lưu trữ chữ cái nhận diện được gần nhất
 
 // --- Hangman Game Logic ---
