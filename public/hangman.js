@@ -249,7 +249,7 @@ function onHandResults(results) {
         }
     } else {
         // Không thấy tay
-        predictedLetter = "Không thấy tay";
+        predictedLetter = "---";
         currentRecognizedLetter = null;
         if (recognizing) submitGuessButton.disabled = true;
     }

@@ -14,113 +14,81 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <style>
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        button:disabled:hover {
+            opacity: 0.5;
+        }
         .game-area {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
+            background-color: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
             margin: 20px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .game-area:hover {
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
 
         .hangman-display {
             text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: white;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .hangman-display p {
+            margin: 10px 0;
+            font-size: 1.1em;
+            color: #495057;
+        }
+
+        .hangman-display span {
+            font-weight: bold;
+            color: #2c3e50;
         }
 
         .word-display {
-            font-size: 2em;
+            font-size: 2.2em;
             font-weight: bold;
             text-align: center;
-            letter-spacing: 0.2em;
-            margin: 20px 0;
-            color: #212529;
+            letter-spacing: 0.3em;
+            margin: 25px 0;
+            color: #2c3e50;
+            font-family: "Courier New", Courier, monospace;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
         }
 
         .game-message {
             text-align: center;
             font-size: 1.2em;
-            margin: 15px 0;
-            padding: 10px;
-            border-radius: 4px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
         .game-message.success {
             background-color: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
 
         .game-message.error {
             background-color: #f8d7da;
             color: #721c24;
-        }
-
-        .recognition-area {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 30px;
-            margin: 30px 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .video-container {
-            position: relative;
-            width: 480px;
-            height: 360px;
-            background-color: #212529;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .input_video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .output_canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .recognition-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            min-width: 280px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .recognition-controls h2 {
-            margin: 0;
-            font-size: 1.4em;
-            color: #212529;
-        }
-
-        #recognized-char {
-            font-size: 3em;
-            font-weight: bold;
-            color: #28a745;
-            min-height: 1.5em;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            border: 1px solid #f5c6cb;
         }
 
         .game-controls {
@@ -128,17 +96,21 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
-            margin: 20px 0;
+            margin: 25px 0;
         }
 
         .game-controls button {
+            width: 200px;
             padding: 12px 24px;
             font-size: 1.1em;
             font-weight: 500;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #start-camera-button {
@@ -146,9 +118,10 @@
             color: white;
         }
 
-        #start-camera-button:hover {
+        #start-camera-button:hover:not(:disabled) {
             background-color: #218838;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
         }
 
         #submit-guess-button {
@@ -158,7 +131,8 @@
 
         #submit-guess-button:hover:not(:disabled) {
             background-color: #0056b3;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
         }
 
         #submit-guess-button:disabled {
@@ -173,17 +147,16 @@
 
         #restart-game-button:hover {
             background-color: #c82333;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
         }
 
-        .note-collection {
-            margin-top: 15px;
-            padding: 10px 15px;
-            background-color: #e9ecef;
-            border-radius: 4px;
-            color: #495057;
-            font-style: italic;
-            border-left: 4px solid #007bff;
+        .game-controls button:active {
+            transform: translateY(0);
+        }
+
+        .game-controls button i {
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -245,38 +218,74 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="welcome-section">
-                <h1>Hangman với Nhận Diện Thủ Ngữ ASL</h1>
-                <p>Sử dụng thủ ngữ (A-Y, 0-9) để đoán chữ. Cần có dữ liệu mẫu đã huấn luyện trước.</p>
-            </div>
+            <div class="dictionary-container">
+                <h1>Trò chơi đoán từ</h1>
 
-            <div class="game-area">
-                <div class="hangman-display">
-                    <p>Số lượt đoán sai còn lại: <span id="guesses-left">6</span></p>
-                    <p>Các chữ đã đoán sai: <span id="wrong-guesses"></span></p>
-                </div>
-                <div class="word-display">
-                    <p id="word-to-guess">_ _ _ _ _</p>
-                </div>
-                <p id="game-status" class="game-message"></p>
-            </div>
+                <div class="dictionary-layout">
 
-            <div class="recognition-area">
-                <div class="video-container">
-                    <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-                    <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
-                </div>
-                <div class="recognition-controls">
-                    <button id="start-camera-button">Bật Camera & Nhận Diện</button>
-                    <p id="status-text">Nhấn nút trên để bắt đầu.</p>
-                    <h2>Ký tự nhận diện: <span id="recognized-char">---</span></h2>
-                    <button id="submit-guess-button" disabled>Gửi Lượt Đoán</button>
-                </div>
-            </div>
+                    <!--LEFTSIDE-->
+                    <div class="camera-section">
+                        <div class="video-container">
+                            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
+                            <canvas class="output_canvas" id="output_canvas" width="640" height="480" style="-webkit-transform: scaleX(-1); transform: scaleX(-1);"></canvas>
+                        </div>
+                        <div class="controls">
+                            <button id="start-camera-button" class="btn-primary">
+                                <i class="fa-solid fa-play" style="margin-right: 10px;"></i>
+                                Bắt đầu
+                            </button>
+                            <p id="status-text" class="status-message">Nhấn "Bắt đầu" và cho phép webcam.</p>
+                        </div>
 
-            <div class="game-controls">
-                <button id="restart-game-button">Chơi Lại</button>
-                <p class="note-collection">Dữ liệu nhận diện được tải từ LocalStorage (khóa: aslTrainingDataKNN_v1). Hãy chắc chắn bạn đã huấn luyện hoặc nhập dữ liệu trước đó.</p>
+                        <div class="instruction-box collapsed">
+                            <div class="instruction-header" onclick="toggleInstructions()">
+                                <i class="fas fa-info-circle"></i>
+                                <h3>Hướng dẫn sử dụng</h3>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="instruction-content">
+                                <p>Đưa tay vào khung hình camera và thực hiện cử chỉ ASL. Giữ ký hiệu 1 giây để nhập ký tự.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--RIGHTSIDE-->
+                    <div class="right-side">
+                        <div class="results">
+                            <h2>Ký tự nhận diện</h2>
+                            <div class="recognition-display">
+                                <div class="recognized-char-box">
+                                    <p id="recognized-char">---</p>
+                                </div>
+                                <p id="hold-indicator"></p>
+                            </div>
+                        </div>
+
+                        <div class="target-section">
+                            <div class="game-area">
+                                <div class="hangman-display">
+                                    <p>Số lượt đoán sai còn lại: <span id="guesses-left">6</span></p>
+                                    <p>Các chữ đã đoán sai: <span id="wrong-guesses"></span></p>
+                                </div>
+                                <div class="word-display">
+                                    <p id="word-to-guess">_ _ _ _ _</p>
+                                </div>
+                                <p id="game-status" class="game-message"></p>
+                            </div>
+
+                            <div class="game-controls">
+                                <button id="submit-guess-button" disabled class="btn-primary">
+                                    <i class="fas fa-check" style="margin-right: 10px;"></i>
+                                    Gửi Lượt Đoán
+                                </button>
+                                <button id="restart-game-button" class="btn-secondary">
+                                    <i class="fas fa-redo" style="margin-right: 10px;"></i>
+                                    Chơi Lại
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="data-collection" style="display: none;">
