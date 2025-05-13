@@ -3,56 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viết Chữ bằng Thủ Ngữ (Giữ 1s)</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>ASL Dictionary - SignLearn</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/2a35d9f1da.js" crossorigin="anonymous"></script>
     <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-    <style>
-        /* Copy style từ sign-to-text.html nếu cần */
-        .text-output-area { margin-top: 20px; margin-bottom: 20px; }
-        #output-text { width: 95%; min-height: 100px; padding: 10px; font-size: 1.5em; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; white-space: pre-wrap; word-wrap: break-word; text-align: left; }
-        .instructions { margin-top: 15px; font-style: italic; color: #666; }
-        .recognition-area { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 20px; border-top: 1px solid #eee; padding-top: 20px; }
-        .video-container { position: relative; width: 480px; height: 360px; background-color: #333; }
-        .input_video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .output_canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .recognition-controls { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 250px; }
-        .recognition-controls h2 { margin-top: 0; font-size: 1.3em; }
-        #recognized-char { font-size: 2.5em; font-weight: bold; color: #28a745; min-height: 1.5em;}
-        #hold-indicator { font-size: 0.9em; color: #007bff; height: 1.2em; /* Giữ chỗ */}
-    </style>
 </head>
 <body>
-    <div class="container sign-to-text-hold-container">
-        <h1>Viết Chữ bằng Thủ Ngữ (Giữ 1 giây)</h1>
-        <p class="note">Biểu diễn thủ ngữ (A-Y, 0-9) và giữ ổn định trong 1 giây để nhập. Dùng 'Z' để xóa.</p>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+<!--            <div class="logo">-->
+<!--                <i class="fas fa-hands-sign-language"></i>-->
+<!--                <span>SignLearn</span>-->
+<!--            </div>-->
+            <ul class="nav-links">
+                <li>
+                    <a href="/">
+                        <i class="fas fa-house"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/letter">
+                        <i class="fas fa-book-open"></i>
+                        <span>Dictionary</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="/sign-to-text">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/learn">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Learn</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/math-calculator">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculator</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/hangman">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Game</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav-links nav-bottom">
+                <li>
+                    <a href="/settings">
+                        <i class="fas fa-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-        <div class="text-output-area">
-            <h3>Văn bản của bạn:</h3>
-            <div id="output-text" contenteditable="false"></div>
-        </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dictionary-container">
+                <h1>Sign-to-text translation</h1>
+                
+                <div class="dictionary-layout">
+                    <!-- Left side - Camera -->
+                    <div class="camera-section">
+                        <div class="video-container">
+                            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
+                            <canvas class="output_canvas" id="output_canvas" width="640" height="480"
+                                    style="  -webkit-transform: scaleX(-1); transform: scaleX(-1);"></canvas>
+                        </div>
+                        <div class="controls">
+                            <button id="start-recognition-button" class="btn-primary">
+                                <i class="fa-solid fa-play" style="margin-right: 10px;"></i>
+                                Bắt đầu</button>
+                            <p id="status-text" class="status-message">Nhấn "Bắt đầu" và cho phép webcam.</p>
+                        </div>
 
-        <div class="recognition-area">
-            <div class="video-container">
-                <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-                <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
+                        <div class="instruction-box collapsed">
+                            <div class="instruction-header" onclick="toggleInstructions()">
+                                <i class="fas fa-info-circle"></i>
+                                <h3>Hướng dẫn sử dụng</h3>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="instruction-content">
+                                <p>Đưa tay vào khung hình camera và thực hiện cử chỉ ASL. Giữ ký hiệu 1 giây để nhập ký tự, sử dụng 'D' để xóa ký tự cuối cùng.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right side - Recognition and Practice -->
+                    <div class="right-side">
+                        <div class="results">
+                            <h2>Ký tự nhận diện</h2>
+                            <div class="recognition-display">
+                                <div class="recognized-char-box">
+                                    <p id="recognized-char">---</p>
+                                </div>
+                                <p id="hold-indicator"></p>
+                            </div>
+                        </div>
+
+                        <div class="target-section">
+                            <div class="text-output-area">
+                                <h2>Văn bản</h2>
+                                <div id="output-text" contenteditable="false" class="text-output-box"></div>
+                                <div class="text-controls practice-buttons" style="margin-top: 30px;">
+                                    <button id="clear-text-button" class="btn-secondary">
+                                        <i class="fas fa-trash" style="margin-right: 8px;"></i>
+                                        Xóa Toàn Bộ
+                                    </button>
+                                    <button id="copy-text-button" class="btn-secondary">
+                                        <i class="fas fa-copy" style="margin-right: 8px;"></i>
+                                        Sao Chép
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="recognition-controls">
-                 <!-- Đổi ID nút để khớp với JS mới -->
-                 <button id="start-recognition-button">Bật Nhận Diện</button>
-                 <p id="status-text">Nhấn nút trên để bắt đầu.</p>
-                 <h2>Đang nhận diện: <span id="recognized-char">---</span></h2>
-                 <p id="hold-indicator"></p> <!-- Hiển thị trạng thái giữ -->
-                 <p class="instructions">Giữ ký hiệu 1 giây để nhập. Dùng 'D' để xóa.</p>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button id="clear-text-button">Xóa Toàn Bộ</button>
-       </div>
-
+        </main>
     </div>
     <!-- Link đến file JS mới -->
     <script src="/sign-to-text.js"></script>

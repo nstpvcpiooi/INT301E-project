@@ -1,0 +1,120 @@
+/* Thêm style riêng nếu cần */
+.learning-area {
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    min-height: 150px;
+}
+#target-word-display span {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin: 0 0.1em;
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+#target-word-display span.current-letter {
+    background-color: #007bff;
+    color: white;
+}
+#target-word-display span.done-letter {
+    background-color: #d4edda;
+    color: #155724;
+    text-decoration: line-through;
+}
+#current-letter-instruction {
+    font-size: 1.2em;
+    margin-top: 10px;
+    color: #555;
+}
+#current-letter-target {
+    font-size: 4em;
+    font-weight: bold;
+    color: #007bff;
+    margin: 10px 0;
+    min-height: 1.5em;
+}
+#feedback-message {
+    font-size: 1.5em;
+    font-weight: bold;
+    min-height: 1.5em;
+    margin-top: 15px;
+}
+.feedback-correct {
+    color: green;
+}
+.feedback-incorrect {
+    color: red;
+}
+#completion-message {
+    font-size: 1.8em;
+    color: #28a745;
+    font-weight: bold;
+    margin-top: 20px;
+}
+.word-input-area {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.word-input-area input[type="text"] {
+    padding: 8px 12px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 200px;
+}
+.word-input-area button {
+    padding: 9px 15px;
+}
+.recognition-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+.video-container {
+    position: relative;
+    width: 480px;
+    height: 360px;
+    background-color: #333;
+}
+.input_video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.output_canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.recognition-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 250px;
+}
+.recognition-controls h2 {
+    margin-top: 0;
+    font-size: 1.3em;
+}
+#recognized-char {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #28a745;
+    min-height: 1.5em;
+}

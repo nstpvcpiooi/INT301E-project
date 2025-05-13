@@ -9,8 +9,7 @@ const charLabelInput = document.getElementById('char-label');
 const captureSampleButton = document.getElementById('capture-sample-button');
 const clearDataButton = document.getElementById('clear-data-button');
 const exportDataButton = document.getElementById('export-data-button');
-const importAlphanumericFileInput = document.getElementById('import-alphanumeric-file');
-const importMathFileInput = document.getElementById('import-math-file');
+const importFileInput = document.getElementById('import-file');
 
 let mediaPipeHands = null;
 let camera = null;
@@ -24,7 +23,7 @@ const K_NEIGHBORS = 3; // Số láng giềng cho KNN (có thể thử nghiệm 3
 // DANH SÁCH CÁC CHỮ CÁI ASL (bỏ J, Z vì chúng động)
 const ASL_ALPHABET = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', // Chữ cái (bỏ J, Z) vì kho nhan dien
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-const LOCAL_STORAGE_KEY = 'aslTrainingDataKNN_v1';
+const LOCAL_STORAGE_KEY = 'text';
 
 // --- 1. Khởi Tạo MediaPipe Hands ---
 function initializeMediaPipeHands() {
@@ -162,17 +161,25 @@ function onHandResults(results) {
         if (canvasElement.width !== videoElement.videoWidth) canvasElement.width = videoElement.videoWidth;
         if (canvasElement.height !== videoElement.videoHeight) canvasElement.height = videoElement.videoHeight;
     }
-    canvasCtx.translate(canvasElement.width, 0); canvasCtx.scale(-1, 1);
+    canvasCtx.translate(canvasElement.width, 0); 
+    canvasCtx.scale(-1, 1);
     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+    
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const handLandmarks = results.multiHandLandmarks[0];
+        currentLandmarks = handLandmarks;
+        
+        // Draw landmarks while canvas is still mirrored
+        drawConnectors(canvasCtx, handLandmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 3 });
+        drawLandmarks(canvasCtx, handLandmarks, { color: '#FF0000', lineWidth: 2, radius: 3 });
+    }
+    
     canvasCtx.restore();
 
     currentLandmarks = null;
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const handLandmarks = results.multiHandLandmarks[0];
         currentLandmarks = handLandmarks;
-
-        drawConnectors(canvasCtx, handLandmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 3 });
-        drawLandmarks(canvasCtx, handLandmarks, { color: '#FF0000', lineWidth: 2, radius: 3 });
 
         const currentTime = Date.now();
         if (recognizing && (currentTime - lastPredictionTime > PREDICTION_INTERVAL)) {
@@ -181,14 +188,27 @@ function onHandResults(results) {
             if (features) {
                 const prediction = predictKNN(features, K_NEIGHBORS);
                 recognizedCharText.textContent = prediction;
+                
+                // Add verification if we have a target character
+                if (targetChar) {
+                    verifySign(prediction);
+                }
             } else {
-                // recognizedCharText.textContent = "Lỗi trích xuất";
+                recognizedCharText.textContent = "Lỗi trích xuất";
+                resetTargetBoxColor();
             }
         }
     } else {
-        if (recognizing) recognizedCharText.textContent = "Không thấy tay";
+        if (recognizing) {
+            recognizedCharText.textContent = "---";
+            resetTargetBoxColor();
+        }
     }
-    // canvasCtx.restore(); // Đã restore sau khi vẽ ảnh, không cần ở đây nữa
+}
+
+function resetTargetBoxColor() {
+    const targetCharBox = document.querySelector('.target-char-box');
+    targetCharBox.classList.remove('correct', 'incorrect');
 }
 
 // --- 6. Thu Thập và Lưu Trữ Dữ Liệu Mẫu (LocalStorage) ---
@@ -278,33 +298,7 @@ exportDataButton.onclick = () => {
     statusText.textContent = "Đã xuất dữ liệu mẫu.";
 };
 
-importAlphanumericFileInput.onclick = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const importedData = JSON.parse(e.target.result);
-                if (Array.isArray(importedData) && importedData.every(item => item.features && item.label)) {
-                    if (confirm(`Tìm thấy ${importedData.length} mẫu. Bạn có muốn THAY THẾ dữ liệu hiện tại bằng dữ liệu nhập vào không?`)) {
-                        trainingData = importedData;
-                        saveTrainingData();
-                        statusText.textContent = `Đã nhập ${trainingData.length} mẫu.`;
-                    }
-                } else {
-                    alert("File JSON không đúng định dạng dữ liệu mẫu.");
-                }
-            } catch (err) {
-                alert("Lỗi khi đọc hoặc parse file JSON: " + err.message);
-            }
-             // Reset input file để có thể chọn lại cùng file nếu cần
-            importFileInput.value = '';
-        };
-        reader.readAsText(file);
-    }
-};
-
-importMathFileInput.onclick = (event) => {
+importFileInput.onchange = (event) => {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
@@ -331,28 +325,85 @@ importMathFileInput.onclick = (event) => {
 };
 
 
-// --- 7. Hàm Chính và Điều Khiển ---
-async function main() {
+// --- 7. Hàm Chính và Điều Khiển --- //turned off async
+function main() {
     initializeMediaPipeHands();
     loadTrainingData();
+    // Add these event listeners
+    document.getElementById('next-char-button').addEventListener('click', getNextChar);
+    document.getElementById('random-char-button').addEventListener('click', getRandomChar);
+
+    // Initialize with first character
+    getNextChar();
 
     startButton.onclick = async () => {
         if (!recognizing) {
             const cameraStarted = await initializeCamera();
             if (cameraStarted) {
                 recognizing = true;
-                startButton.textContent = "Dừng";
+                startButton.innerHTML = '<i class="fa-solid fa-stop" style="margin-right: 10px;"></i>Dừng';
             }
         } else {
             recognizing = false;
             if (camera) camera.stop();
-            startButton.textContent = "Bắt đầu";
+            startButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bắt đầu';
             statusText.textContent = "Đã dừng. Nhấn 'Bắt đầu' để tiếp tục.";
             recognizedCharText.textContent = "---";
             currentLandmarks = null; // Xóa landmarks khi dừng
             captureSampleButton.disabled = true;
         }
     };
+}
+
+
+
+// --- Add these variables at the top with other declarations ---
+let targetChar = null;
+let currentCharIndex = 0;
+let verificationTimeout = null;
+const VERIFICATION_DELAY = 1000; // ms to wait before verifying
+
+// --- Add these functions ---
+function getNextChar() {
+    currentCharIndex = (currentCharIndex + 1) % ASL_ALPHABET.length;
+    targetChar = ASL_ALPHABET[currentCharIndex];
+    document.getElementById('target-char').textContent = targetChar;
+    const targetCharBox = document.querySelector('.target-char-box');
+    targetCharBox.classList.remove('correct', 'incorrect');
+}
+
+function getRandomChar() {
+    currentCharIndex = Math.floor(Math.random() * ASL_ALPHABET.length);
+    targetChar = ASL_ALPHABET[currentCharIndex];
+    document.getElementById('target-char').textContent = targetChar;
+    const targetCharBox = document.querySelector('.target-char-box');
+    targetCharBox.classList.remove('correct', 'incorrect');
+}
+
+function verifySign(predictedChar) {
+    if (!targetChar) return;
+    
+    const targetCharBox = document.querySelector('.target-char-box');
+    
+    if (predictedChar === targetChar) {
+        targetCharBox.classList.add('correct');
+        targetCharBox.classList.remove('incorrect');
+        
+        // Automatically move to next character after delay
+        clearTimeout(verificationTimeout);
+        verificationTimeout = setTimeout(() => {
+            targetCharBox.classList.remove('correct');
+            getNextChar();
+        }, 2000);
+    } else {
+        targetCharBox.classList.add('incorrect');
+        targetCharBox.classList.remove('correct');
+    }
+}
+
+function toggleInstructions() {
+    const instructionBox = document.querySelector('.instruction-box');
+    instructionBox.classList.toggle('collapsed');
 }
 
 main();

@@ -1,4 +1,4 @@
-// --- START OF FILE public/sign-to-text-hold.js ---
+'7'// --- START OF FILE public/sign-to-text-hold.js ---
 
 // --- DOM Elements (Adapted from learn.js, adding/removing as needed) ---
 const videoElement = document.getElementById('input_video');
@@ -86,7 +86,7 @@ async function initializeCamera() {
         statusText.textContent = userMessage;
         alert(userMessage);
         recognitionActive = false; // Reset state on error
-        startRecognitionButton.textContent = "Bật Nhận Diện";
+        startRecognitionButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bắt đầu'
         startRecognitionButton.disabled = (trainingData.length === 0);
         return false;
     }
@@ -154,7 +154,7 @@ function onHandResults(results) {
         const features = extractDistanceFeatures(currentLandmarks);
         prediction = features ? predictKNN(features, K_NEIGHBORS) : "FE Err";
     } else {
-        prediction = "No Hand";
+        prediction = "---";
     }
 
     // Update real-time recognized character
@@ -207,7 +207,7 @@ function onHandResults(results) {
     } else {
         // --- Sign changed or is invalid/uncertain ---
         // Reset hold state ONLY if the new prediction is potentially valid or clear indicator
-        if (isPotentiallyValidHold || prediction === "---" || prediction === "No Hand") {
+        if (isPotentiallyValidHold || prediction === "---" || prediction === "---") {
              if (heldChar !== null) { // Only log/reset if there WAS a character being held
                   console.log(`Sign changed from ${heldChar} to ${prediction}. Resetting hold.`);
              }
@@ -273,7 +273,7 @@ function stopRecognition() {
             catch (stopError) { console.error("Error stopping camera:", stopError); }
         }
         // Reset UI and State
-        startRecognitionButton.textContent = "Bật Nhận Diện"; // Reset button text
+        startRecognitionButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bắt đầu' // Reset button text
         statusText.textContent = "Đã dừng nhận diện.";
         recognizedCharText.textContent = "---";
         holdIndicatorElement.textContent = ""; // Clear hold indicator
@@ -308,7 +308,7 @@ startRecognitionButton.onclick = async () => {
 
         if (cameraStarted) {
             recognitionActive = true;
-            startRecognitionButton.textContent = "Dừng Nhận Diện";
+            startRecognitionButton.innerHTML = '<i class="fa-solid fa-stop" style="margin-right: 10px;"></i>Dừng';
             startRecognitionButton.disabled = false;
             // Reset state for a new session
             currentText = "";
@@ -322,7 +322,7 @@ startRecognitionButton.onclick = async () => {
         } else {
             // Error handled in initializeCamera, ensure button state is correct
             recognitionActive = false;
-            startRecognitionButton.textContent = "Bật Nhận Diện";
+            startRecognitionButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bắt đầu';
             startRecognitionButton.disabled = (trainingData.length === 0);
         }
     } else {
@@ -353,6 +353,11 @@ function main() {
         startRecognitionButton.disabled = true;
     }
     console.log("Initialization complete. Waiting for user action.");
+}
+
+function toggleInstructions() {
+    const instructionBox = document.querySelector('.instruction-box');
+    instructionBox.classList.toggle('collapsed');
 }
 
 main();

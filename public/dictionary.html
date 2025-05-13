@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASL (Node.js + KNN + MediaPipe)</title>
-    <link rel="stylesheet" href="/style.css"> <!-- Đường dẫn đúng khi dùng Express static -->
+    <title>ASL Dictionary - SignLearn</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/2a35d9f1da.js" crossorigin="anonymous"></script>
     <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
@@ -12,53 +17,148 @@
 </head>
 <body>
     <div class="container">
-        <h1>Nhận Diện ASL (Node.js Server)</h1>
-        <p>Sử dụng MediaPipe và KNN. Bạn cần tự thu thập dữ liệu mẫu.</p>
-        <p class="note">Hướng dẫn: Nhấn "Bắt đầu". Thực hiện một cử chỉ ASL (A-Y). Nhập ký tự tương ứng vào ô "Nhãn" rồi nhấn "Lưu Mẫu Này". Lặp lại nhiều lần cho mỗi ký tự.</p>
+        <!-- Sidebar -->
+        <nav class="sidebar">
+<!--            <div class="logo">-->
+<!--                <i class="fas fa-hands-sign-language"></i>-->
+<!--                <span>SignLearn</span>-->
+<!--            </div>-->
+            <ul class="nav-links">
+                <li>
+                    <a href="/">
+                        <i class="fas fa-house"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="/letter">
+                        <i class="fas fa-book-open"></i>
+                        <span>Dictionary</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/sign-to-text">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/learn">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Learn</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/math-calculator">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculator</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/hangman">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Game</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav-links nav-bottom">
+                <li>
+                    <a href="/settings">
+                        <i class="fas fa-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-        <div class="video-container">
-            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-            <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
-        </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dictionary-container">
+                <h1>ASL Dictionary</h1>
+                
+                <div class="dictionary-layout">
+                    <!-- Left side - Camera -->
+                    <div class="camera-section">
+                        <div class="video-container">
+                            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
+                            <canvas class="output_canvas" id="output_canvas" width="640" height="480"
+                                    style="  -webkit-transform: scaleX(-1); transform: scaleX(-1);"></canvas>
+                        </div>
+                        <div class="controls">
+                            <button id="start-button" class="btn-primary">
+                                <i class="fa-solid fa-play" style="margin-right: 10px;"></i>
+                                Bắt đầu</button>
+                            <p style="display: none">Số mẫu dữ liệu đã lưu: <span id="data-count">0</span></p>
+                            <p id="status-text" class="status-message">Nhấn "Bắt đầu" và cho phép webcam.</p>
+                        </div>
 
-        <div class="controls">
-            <button id="start-button">Bắt đầu</button>
-            <p>Số mẫu dữ liệu đã lưu: <span id="data-count">0</span></p>
-        </div>
+                        <div class="instruction-box collapsed">
+                            <div class="instruction-header" onclick="toggleInstructions()">
+                                <i class="fas fa-info-circle"></i>
+                                <h3>Hướng dẫn sử dụng</h3>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="instruction-content">
+                                Nhấn nút "Bắt đầu" để khởi động camera, đưa tay vào khung hình camera và thực hiện cử chỉ ASL tương ứng
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="results">
-            <h2>Ký tự nhận diện:</h2>
-            <p id="recognized-char">---</p>
-            <p id="status-text">Nhấn "Bắt đầu" và cho phép webcam.</p>
-        </div>
+                    <!-- Right side - Recognition and Practice -->
+                    <div class="right-side">
+                        <div class="results">
+                            <h2>Ký tự nhận diện</h2>
+                            <div class="recognition-display">
+                                <div class="recognized-char-box">
+                                    <p id="recognized-char">---</p>
+                                </div>
+                                
+                            </div>
+                        </div>
 
-
-        <!-- Add this in the results section after the recognized character -->
-        <div class="target-section">
-            <h2>Luyện tập:</h2>
-            <p>Làm theo ký tự: <span id="target-char">---</span></p>
-            <p id="verification-result"></p>
-            <button id="next-char-button">Ký tự tiếp theo</button>
-            <button id="random-char-button">Ký tự ngẫu nhiên</button>
-        </div>
-
-
-
-
-        <div class="data-collection">
-            <h3>Công Cụ Thu Thập Dữ Liệu Mẫu</h3>
-            <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
-            <input type="text" id="char-label" maxlength="1" size="3">
-            <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
-            <div class="data-actions">
-                <button id="clear-data-button">Xóa Tất Cả Mẫu Đã Lưu</button>
-                <button id="export-data-button">Xuất Dữ Liệu Mẫu (JSON)</button>
-                <label for="import-file" class="import-button">Nhập Dữ Liệu Mẫu (JSON)</label>
-                <input type="file" id="import-file" accept=".json" style="display: none;">
+                        <div class="target-section">
+                            <h2>Luyện tập</h2>
+                            <div class="practice-area">
+                                <div class="target-char-display">
+                                    <div class="target-char-box">
+                                        <p id="target-char">---</p>
+                                    </div>
+                                </div>
+                                <div class="verification-area">
+                                    <p id="verification-result" class="verification-message"></p>
+                                </div>
+                                <div class="practice-buttons">
+                                    <button id="next-char-button" class="btn-secondary">
+                                        <i class="fas fa-forward" style="margin-right: 8px;"></i>
+                                        Ký tự tiếp theo
+                                    </button>
+                                    <button id="random-char-button" class="btn-secondary">
+                                        <i class="fas fa-random" style="margin-right: 8px;"></i>
+                                        Ký tự ngẫu nhiên
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <p class="note-collection"><em>Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.</em></p>
+        </main>
+    </div>
+
+    <!--hide-->
+    <div class="data-collection" style="display: none;">
+        <div>
+            <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
+            <input type="text" id="char-label" maxlength="1" size="3" class="input-field">
+            <button id="capture-sample-button" disabled class="btn-primary">Lưu Mẫu Này</button>
+        </div>
+        <div>
+            <button id="clear-data-button" class="btn-danger">Xóa Tất Cả Mẫu Đã Lưu</button>
+            <button id="export-data-button" class="btn-secondary">Xuất Dữ Liệu Mẫu (JSON)</button>
+            <label for="import-file" class="btn-secondary">Nhập Dữ Liệu Mẫu (JSON)</label>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
         </div>
     </div>
-    <script src="/script.js"></script> <!-- Đường dẫn đúng khi dùng Express static -->
+    <script src="/dictionary.js"></script>
 </body>
 </html>
