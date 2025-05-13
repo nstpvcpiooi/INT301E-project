@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viết Chữ bằng Thủ Ngữ (Giữ 1s)</title>
+    <title>ASL Dictionary - SignLearn</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="sign-to-text.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/2a35d9f1da.js" crossorigin="anonymous"></script>
     <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
@@ -73,43 +73,66 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <h1>ASL Dictionary</h1>
+            <div class="dictionary-container">
+                <h1>Sign-to-text translation</h1>
+                
+                <div class="dictionary-layout">
+                    <!-- Left side - Camera -->
+                    <div class="camera-section">
+                        <div class="video-container">
+                            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
+                            <canvas class="output_canvas" id="output_canvas" width="640" height="480"
+                                    style="  -webkit-transform: scaleX(-1); transform: scaleX(-1);"></canvas>
+                        </div>
+                        <div class="controls">
+                            <button id="start-recognition-button" class="btn-primary">
+                                <i class="fa-solid fa-play" style="margin-right: 10px;"></i>
+                                Bắt đầu</button>
+                            <p id="status-text" class="status-message">Nhấn "Bắt đầu" và cho phép webcam.</p>
+                        </div>
 
-            <div class="text-output-area">
-                <h3>Văn bản của bạn:</h3>
-                <div id="output-text" contenteditable="false"></div>
-            </div>
+                        <div class="instruction-box collapsed">
+                            <div class="instruction-header" onclick="toggleInstructions()">
+                                <i class="fas fa-info-circle"></i>
+                                <h3>Hướng dẫn sử dụng</h3>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="instruction-content">
+                                <p>Đưa tay vào khung hình camera và thực hiện cử chỉ ASL. Giữ ký hiệu 1 giây để nhập ký tự, sử dụng 'D' để xóa ký tự cuối cùng.</p>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="recognition-area">
-                <div class="video-container">
-                    <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-                    <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
+                    <!-- Right side - Recognition and Practice -->
+                    <div class="right-side">
+                        <div class="results">
+                            <h2>Ký tự nhận diện</h2>
+                            <div class="recognition-display">
+                                <div class="recognized-char-box">
+                                    <p id="recognized-char">---</p>
+                                </div>
+                                <p id="hold-indicator"></p>
+                            </div>
+                        </div>
+
+                        <div class="target-section">
+                            <div class="text-output-area">
+                                <h2>Văn bản</h2>
+                                <div id="output-text" contenteditable="false" class="text-output-box"></div>
+                                <div class="text-controls practice-buttons" style="margin-top: 30px;">
+                                    <button id="clear-text-button" class="btn-secondary">
+                                        <i class="fas fa-trash" style="margin-right: 8px;"></i>
+                                        Xóa Toàn Bộ
+                                    </button>
+                                    <button id="copy-text-button" class="btn-secondary">
+                                        <i class="fas fa-copy" style="margin-right: 8px;"></i>
+                                        Sao Chép
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="recognition-controls">
-                    <button id="start-recognition-button">Bật Nhận Diện</button>
-                    <p id="status-text">Nhấn nút trên để bắt đầu.</p>
-                    <h2>Đang nhận diện: <span id="recognized-char">---</span></h2>
-                    <p id="hold-indicator"></p>
-                    <p class="instructions">Giữ ký hiệu 1 giây để nhập. Dùng 'D' để xóa.</p>
-                </div>
-            </div>
-
-            <div class="controls">
-                <button id="clear-text-button">Xóa Toàn Bộ</button>
-            </div>
-
-            <div class="data-collection" style="display: none;">
-                <h3>Công Cụ Thu Thập Dữ Liệu Mẫu</h3>
-                <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
-                <input type="text" id="char-label" maxlength="1" size="3">
-                <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
-                <div class="data-actions">
-                    <button id="clear-data-button">Xóa Tất Cả Mẫu Đã Lưu</button>
-                    <button id="export-data-button">Xuất Dữ Liệu Mẫu (JSON)</button>
-                    <label for="import-file" class="import-button">Nhập Dữ Liệu Mẫu (JSON)</label>
-                    <input type="file" id="import-file" accept=".json" style="display: none;">
-                </div>
-                <p class="note-collection"><em>Sau khi bật nhận diện, đưa tay vào, thực hiện cử chỉ, nhập nhãn và nhấn "Lưu Mẫu". Làm ít nhất 5-10 mẫu cho mỗi ký tự.</em></p>
             </div>
         </main>
     </div>

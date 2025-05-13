@@ -401,4 +401,9 @@ function verifySign(predictedChar) {
     }
 }
 
+function toggleInstructions() {
+    const instructionBox = document.querySelector('.instruction-box');
+    instructionBox.classList.toggle('collapsed');
+}
+
 main();

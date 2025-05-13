@@ -255,7 +255,6 @@ body {
     padding: 12px 32px;
     border-radius: 9999px;
     cursor: pointer;
-    font-size: 16px;
     font-weight: 500;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
@@ -811,19 +810,6 @@ html {
     line-height: 1.5;
 }
 
-.instruction-content ol {
-    margin: 0;
-    padding-left: 20px;
-}
-
-.instruction-content li {
-    margin-bottom: 8px;
-}
-
-.instruction-content li:last-child {
-    margin-bottom: 0;
-}
-
 @media (max-width: 768px) {
     .instruction-box {
         margin: 10px;
@@ -838,4 +824,27 @@ html {
         padding: 12px;
         font-size: 0.9em;
     }
+}
+
+.text-output-area {
+    background-color: transparent;
+}
+
+#output-text {
+    width: 100%;
+    min-height: 195px;
+    padding: 15px;
+    font-size: 1.5em;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background-color: white;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: left;
+    transition: border-color 0.3s ease;
+}
+
+#output-text:focus {
+    border-color: #007bff;
+    outline: none;
 }

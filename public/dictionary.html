@@ -91,19 +91,6 @@
                             <p style="display: none">Số mẫu dữ liệu đã lưu: <span id="data-count">0</span></p>
                             <p id="status-text" class="status-message">Nhấn "Bắt đầu" và cho phép webcam.</p>
                         </div>
-                        <div class="data-collection" style="display: none;">
-                            <div>
-                                <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
-                                <input type="text" id="char-label" maxlength="1" size="3" class="input-field">
-                                <button id="capture-sample-button" disabled class="btn-primary">Lưu Mẫu Này</button>
-                            </div>
-                            <div>
-                                <button id="clear-data-button" class="btn-danger">Xóa Tất Cả Mẫu Đã Lưu</button>
-                                <button id="export-data-button" class="btn-secondary">Xuất Dữ Liệu Mẫu (JSON)</button>
-                                <label for="import-file" class="btn-secondary">Nhập Dữ Liệu Mẫu (JSON)</label>
-                                <input type="file" id="import-file" accept=".json" style="display: none;">
-                            </div>
-                        </div>
 
                         <div class="instruction-box collapsed">
                             <div class="instruction-header" onclick="toggleInstructions()">
@@ -157,12 +144,21 @@
             </div>
         </main>
     </div>
+
+    <!--hide-->
+    <div class="data-collection" style="display: none;">
+        <div>
+            <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
+            <input type="text" id="char-label" maxlength="1" size="3" class="input-field">
+            <button id="capture-sample-button" disabled class="btn-primary">Lưu Mẫu Này</button>
+        </div>
+        <div>
+            <button id="clear-data-button" class="btn-danger">Xóa Tất Cả Mẫu Đã Lưu</button>
+            <button id="export-data-button" class="btn-secondary">Xuất Dữ Liệu Mẫu (JSON)</button>
+            <label for="import-file" class="btn-secondary">Nhập Dữ Liệu Mẫu (JSON)</label>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+        </div>
+    </div>
     <script src="/dictionary.js"></script>
-    <script>
-        function toggleInstructions() {
-            const instructionBox = document.querySelector('.instruction-box');
-            instructionBox.classList.toggle('collapsed');
-        }
-    </script>
 </body>
 </html>
