@@ -7,9 +7,15 @@ const port = process.env.PORT || 3000; // Sử dụng cổng môi trường ho�
 // Phục vụ các file tĩnh từ thư mục 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Route mặc định để phục vụ file index.html
+// Route cho trang chính (index.html)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+
+// Route settings.html
+app.get('/settings', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'settings.html'));
 });
 
 
@@ -43,4 +49,11 @@ app.get('/math-calculator', (req, res) => {
 app.listen(port, () => {
     console.log(`Server đang chạy tại http://localhost:${port}`);
     console.log(`Phục vụ các file tĩnh từ thư mục: ${path.join(__dirname, 'public')}`);
+
+    console.log(`Đường dẫn đến trang cài đặt: http://localhost:${port}/settings`);
+    console.log(`Đường dẫn đến trang luyện tập bảng chữ cái: http://localhost:${port}/letter`);
+    console.log(`Đường dẫn đến trang trò chơi HANGMAN: http://localhost:${port}/hangman`);
+    console.log(`Đường dẫn đến trang Học từ vựng: http://localhost:${port}/learn`);
+    console.log(`Đường dẫn đến trang Chuyển đổi chữ ký thành văn bản: http://localhost:${port}/sign-to-text`);
+    console.log(`Đường dẫn đến trang Máy tính toán học: http://localhost:${port}/math-calculator`);
 });

@@ -5,69 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASL Data Management</title> <!-- Đổi tiêu đề cho phù hợp -->
     <link rel="stylesheet" href="/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Quản Lý và Thu Thập Dữ Liệu ASL</h1>
-        <p>Sử dụng MediaPipe và KNN.</p>
-
-        <div class="dataset-selector" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-            <label for="dataset-key-select">Bộ dữ liệu đang làm việc (để thu thập, xóa, xuất, nhận diện thử):</label>
-            <select id="dataset-key-select">
-                <option value="aslAlphanumericData_v1" selected>Dữ liệu Chữ/Số (Mặc định)</option>
-                <option value="aslMathData_v1">Dữ liệu Toán học</option>
-            </select>
-        </div>
-
-        <div class="data-import-area" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
-            <h4>Nhập Dữ Liệu:</h4>
-            <div>
-                <label for="import-alphanumeric-file" class="import-button">Nhập Dữ liệu Chữ/Số (JSON)</label>
-                <input type="file" id="import-alphanumeric-file" accept=".json" style="display: none;">
-                <span style="font-size: 0.8em;">(Sẽ lưu vào key: aslAlphanumericData_v1)</span>
-            </div>
-            <div style="margin-top: 10px;">
-                <label for="import-math-file" class="import-button">Nhập Dữ liệu Toán học (JSON)</label>
-                <input type="file" id="import-math-file" accept=".json" style="display: none;">
-                <span style="font-size: 0.8em;">(Sẽ lưu vào key: aslMathData_v1)</span>
-            </div>
-        </div>
-
-
-        <p class="note">Hướng dẫn: Chọn bộ dữ liệu đang làm việc. Nhấn "Bắt đầu". Thực hiện cử chỉ. Nhập nhãn rồi nhấn "Lưu Mẫu Này".</p>
-
-        <div class="video-container">
-            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-            <canvas class="output_canvas" id="output_canvas" width="480" height="360"></canvas>
-        </div>
-
-        <div class="controls">
-            <button id="start-button">Bắt đầu Camera</button>
-             <p>Số mẫu trong bộ (<span id="current-dataset-key-display">Chữ/Số</span>): <span id="data-count">0</span></p>
-        </div>
-
-        <div class="results">
-            <h2>Ký tự nhận diện (từ bộ đang chọn):</h2>
-            <p id="recognized-char">---</p>
-            <p id="status-text">Chọn bộ dữ liệu và nhấn "Bắt đầu Camera".</p>
-        </div>
-
-        <div class="data-collection">
-            <h3>Công Cụ Thu Thập Dữ Liệu (cho bộ đang chọn)</h3>
-            <label for="char-label">Nhãn ký tự:</label>
-            <input type="text" id="char-label" maxlength="3" size="5"> <!-- Tăng maxlength nếu cần cho toán tử -->
-            <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
-            <div class="data-actions">
-                <button id="clear-data-button">Xóa Bộ Dữ Liệu Hiện Tại</button>
-                <button id="export-data-button">Xuất Bộ Dữ Liệu Hiện Tại (JSON)</button>
-                <!-- Nút nhập chung đã được tách ra ở trên -->
-            </div>
-            <p class="note-collection"><em>Lưu ý: Thu thập, Xóa, Xuất sẽ áp dụng cho bộ dữ liệu đang được chọn ở trên.</em></p>
-        </div>
-    </div>
-    <script src="/ori.js"></script>
+<P>Hello</P>
 </body>
 </html>
