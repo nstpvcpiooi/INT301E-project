@@ -39,13 +39,13 @@ body {
     width: 280px;
     background: #f5f7fa;
     color: #6c7a89;
-    padding: 32px 0 0 0;
+    padding: 32px 0 18px 0;
     position: fixed;
     left: 0;
     top: 0;
     height: 100vh;
     border-radius: 0 24px 24px 0;
-    box-shadow: 2px 0 16px rgba(0,0,0,0.03);
+    box-shadow: 2px 0 5px rgba(0,0,0,0.03);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -106,6 +106,15 @@ body {
     font-weight: 500;
     box-shadow: 0 2px 8px rgba(59,130,246,0.08);
     border-radius: 16px;
+}
+
+.nav-links li.book-tab a {
+    color: #ff4f84;
+}
+
+.nav-links li.book-tab a:hover {
+    background: linear-gradient(to right, #ffd7e4 100%, #fffafc 0%);
+    color: #ff4f84;
 }
 
 .nav-links li:last-child {

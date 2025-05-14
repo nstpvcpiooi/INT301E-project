@@ -87,4 +87,7 @@ app.listen(port, () => {
     console.log(`Đường dẫn đến trang Chuyển đổi chữ ký thành văn bản: http://localhost:${port}/sign-to-text`);
     console.log(`Đường dẫn đến trang Máy tính toán học: http://localhost:${port}/math-calculator`);
     console.log(`Đường dẫn đến trang Chatbot: http://localhost:${port}/chatbot`);
+
+    // đọc truyện
+    console.log(`Đường dẫn đến trang đọc truyện: http://localhost:${port}/book`);
 });
