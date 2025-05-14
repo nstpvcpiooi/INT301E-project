@@ -193,7 +193,7 @@ function onHandResults(results) {
     }
     canvasCtx.restore(); // Khôi phục lại trạng thái canvas ban đầu (không lật)
 
-    let predictedLetter = "Không thấy tay";
+    let predictedLetter = "---";
 
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const handLandmarks = results.multiHandLandmarks[0];
@@ -302,7 +302,7 @@ startCameraButton.onclick = async () => {
         const cameraStarted = await initializeCamera();
         if (cameraStarted) {
             recognizing = true;
-            startCameraButton.textContent = "Dừng Camera";
+            startCameraButton.innerHTML = '<i class="fa-solid fa-stop" style="margin-right: 10px;"></i>Dừng';
             // Nút submit sẽ được bật/tắt trong onHandResults
         }
     } else {
@@ -341,6 +341,10 @@ sendButton.onclick = async () => {
     }
 }
 
+function toggleInstructions() {
+    const instructionBox = document.querySelector('.instruction-box');
+    instructionBox.classList.toggle('collapsed');
+}
 
 // Hàm chính để khởi tạo khi vào route /chatbot
 function main() {
@@ -355,7 +359,7 @@ function stopRecognition() {
         camera = null;
     }
     recognizing = false;
-    startCameraButton.textContent = "Bật Camera";
+    startCameraButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bắt đầu';
     if (recognizedSequence === '') {
         sendButton.disabled = true; // Tắt nút gửi
     } // Tắt nút gửi

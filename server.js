@@ -86,4 +86,5 @@ app.listen(port, () => {
     console.log(`Đường dẫn đến trang Học từ vựng: http://localhost:${port}/learn`);
     console.log(`Đường dẫn đến trang Chuyển đổi chữ ký thành văn bản: http://localhost:${port}/sign-to-text`);
     console.log(`Đường dẫn đến trang Máy tính toán học: http://localhost:${port}/math-calculator`);
+    console.log(`Đường dẫn đến trang Chatbot: http://localhost:${port}/chatbot`);
 });

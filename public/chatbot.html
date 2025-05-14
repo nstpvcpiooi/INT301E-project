@@ -9,32 +9,196 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="./chatbot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        button:disabled:hover {
+            opacity: 0.5;
+        }
+        .message-area {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+        .message-area h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        #recognizedText {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 15px 0;
+            min-height: 100px;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            word-wrap: break-word;
+        }
+        .send-button-container {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .response-area h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        #bot-response {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            min-height: 150px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        #status-text {
+            margin-top: 15px;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
 </head>
 <body>
-    <h1>Chatbot with Camera</h1>
-    <div class="recognition-area">
-        <!-- Camera and Canvas -->
-        <div class="video-container">
-            <video class="input_video" id="video" autoplay playsinline style="display: none;"></video>
-            <canvas class="output_canvas" id="canvas" width="480" height="360"></canvas>
-        </div>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <ul class="nav-links">
+                <li>
+                    <a href="/">
+                        <i class="fas fa-house"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/letter">
+                        <i class="fas fa-book-open"></i>
+                        <span>Dictionary</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/sign-to-text">
+                        <i class="fas fa-language"></i>
+                        <span>Translate</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/learn">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>Learn</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/math-calculator">
+                        <i class="fas fa-calculator"></i>
+                        <span>Calculator</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/hangman">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Game</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="/chatbot">
+                        <i class="fa-solid fa-comments"></i>
+                        <span>Chatbot</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="nav-links nav-bottom">
+                <li>
+                    <a href="/settings">
+                        <i class="fas fa-gear"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
-        <!-- Recognition Controls -->
-        <div class="recognition-controls">
-            <button id="startCamera">Bật Camera & Nhận Diện</button>
-            <p id="status-text">Nhấn nút trên để bắt đầu.</p>
-            <h2>Ký tự hiện tại: <span id="recognized-char">---</span></h2>
-            <h2>Tin nhắn hiện tại: <span id="recognizedText">---</span></h2>
-            <button id="send-button" disabled>Gửi</button>
-        </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dictionary-container">
+                <h1>Chatbot with Camera</h1>
 
-        <!-- Bot Response -->
-        <div id="response">
-            <strong>Phản hồi từ bot:</strong> 
-            <p>---</p>
-        </div>
+                <div class="dictionary-layout">
+                    <!--Left side - Camera-->
+                    <div class="camera-section">
+                        <div class="video-container">
+                            <video class="input_video" id="video" autoplay playsinline style="display: none;"></video>
+                            <canvas class="output_canvas" id="canvas" width="480" height="360"></canvas>
+                        </div>
+
+                        <div class="controls">
+                            <button id="startCamera" class="btn-primary">
+                                <i class="fa-solid fa-paper-plane" style="margin-right: 10px"></i>
+                                Bắt đầu
+                            </button>
+                            <p id="status-text" class="status-message">Nhấn nút trên để bắt đầu.</p>
+                        </div>
+
+                        <div class="instruction-box collapsed">
+                            <div class="instruction-header" onclick="toggleInstructions()">
+                                <i class="fas fa-info-circle"></i>
+                                <h3>Hướng dẫn sử dụng</h3>
+                                <i class="fas fa-chevron-down toggle-icon"></i>
+                            </div>
+                            <div class="instruction-content">
+                                <p>Đưa tay vào khung hình camera và thực hiện cử chỉ ASL. Giữ ký hiệu 1 giây để nhập ký tự.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Right side-->
+                    <div class="right-side">
+                        <div class="results">
+                            <h2>Ký tự nhận diện</h2>
+                            <div class="recognition-display">
+                                <div class="recognized-char-box">
+                                    <p id="recognized-char">---</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="target-section">
+                            <h3>Tin nhắn hiện tại</h3>
+                            <div id="recognizedText">---</div>
+                            <div class="send-button-container">
+                                <button id="send-button" disabled class="btn-primary">
+                                    <i class="fa-solid fa-paper-plane" style="margin-right: 8px;"></i>
+                                    Gửi tin nhắn
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="target-section">
+                            <h3>Phản hồi từ Chatbot</h3>
+                            <div id="bot-response">---</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-    <script src="./config.js"></script>
-    <script type="module" src="./chatbot.js"></script>
+    <script src="./chatbot.js"></script>
 </body>
 </html>
