@@ -108,9 +108,6 @@ body {
     border-radius: 16px;
 }
 
-.nav-links li.book-tab a {
-    color: #ff4f84;
-}
 
 .nav-links li.book-tab a:hover {
     background: linear-gradient(to right, #ffd7e4 100%, #fffafc 0%);
