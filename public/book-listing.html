@@ -3,83 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Sách Truyện</title>
-    <link rel="stylesheet" href="/style.css">
+    <title>Tìm Kiếm & Danh Sách Truyện</title>
+    <link rel="stylesheet" href="/book_style.css">
+    <!-- MediaPipe Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <style>
-        .comics-section { margin-bottom: 30px; }
-        .comics-section h2 { text-align: left; margin-left: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
-        .comics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsive grid */
-            gap: 20px;
+        /* Add styles for the new gesture input area for search */
+        .search-gesture-controls {
+            margin-top: 15px;
             padding: 10px;
-        }
-        .comic-item {
+            border: 1px dashed var(--card-border);
+            border-radius: 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            text-decoration: none;
-            color: #333;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            transition: box-shadow 0.3s ease;
+            gap: 8px;
+            background-color: var(--card-bg); /* Use card background */
         }
-        .comic-item:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-        .comic-item img {
-            width: 100%;
-            max-width: 150px; /* Max width for thumbnail */
-            height: 200px;  /* Fixed height for thumbnail */
-            object-fit: cover; /* Cover the area, might crop */
+        .search-gesture-video-container {
+            width: 240px; /* Smaller video for this */
+            height: 180px;
+            position: relative;
+            background-color: #000;
+            border: 1px solid var(--card-border);
             border-radius: 4px;
-            margin-bottom: 10px;
         }
-        .comic-item .comic-name {
-            font-size: 0.9em;
-            text-align: center;
-            font-weight: bold;
-            height: 40px; /* Ensure space for two lines of text */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+        .search_gesture_input_video { display: none; }
+        .search_gesture_output_canvas { width: 100%; height: 100%; display: block; }
 
+        #toggle-search-gesture-input, #search-gesture-status, #search-recognized-char {
+            font-size: 0.9em;
+            color: var(--text-color);
         }
-        .comic-item .latest-chapter {
-            font-size: 0.8em;
-            color: #777;
-            margin-top: 5px;
-        }
-        #loading-main, #error-main { text-align: center; font-size: 1.2em; margin-top: 50px; }
+        #search-recognized-char { font-weight: bold; color: var(--link-color); }
+        .search-gesture-controls p { margin: 3px 0; }
     </style>
 </head>
-<body>
+<body class="">
+    <button id="theme-toggle-button">Chuyển Theme</button>
+
     <div class="container">
-        <h1>Khám Phá Truyện Tranh</h1>
+        <div class="page-header">
+            <h1>Khám Phá & Tìm Kiếm Truyện Tranh</h1>
+        </div>
 
-        <div id="loading-main">Đang tải danh sách truyện...</div>
-        <div id="error-main" style="display:none; color: red;"></div>
+        <div class="search-section">
+            <input type="text" id="search-input" placeholder="Nhập tên truyện...">
+            <button id="search-button">Tìm</button>
+        </div>
 
-        <div id="comics-container" style="display:none;">
-            <div class="comics-section">
-                <h2>Truyện Mới Cập Nhật</h2>
-                <div id="new-comics-grid" class="comics-grid">
-                    <!-- New comics will be loaded here -->
-                </div>
+        <!-- GESTURE INPUT FOR SEARCH -->
+        <div class="search-gesture-controls">
+            <button id="toggle-search-gesture-input">Dùng Thủ Ngữ để Tìm</button>
+            <div id="search-gesture-video-container" style="display:none;">
+                <video class="search_gesture_input_video" id="search_gesture_input_video" autoplay playsinline></video>
+                <canvas class="search_gesture_output_canvas" id="search_gesture_output_canvas" width="240" height="180"></canvas>
             </div>
+            <p id="search-gesture-status">Trạng thái: Chưa kích hoạt</p>
+            <p>Nhận diện (tìm kiếm): <span id="search-recognized-char">---</span></p>
+            <p id="search-gesture-hold-indicator" style="font-size: 0.8em; height: 1em;"></p>
+            <p style="font-size: 0.8em;">(Sử dụng bộ dữ liệu chữ/số. Giữ ký hiệu 1s. Dùng 'D' để xóa.)</p>
+        </div>
+        <!-- END GESTURE INPUT FOR SEARCH -->
 
-            <div class="comics-section">
-                <h2>Truyện Hot/Nổi Bật (Ví dụ)</h2>
-                <div id="hot-comics-grid" class="comics-grid">
-                    <!-- Hot comics will be loaded here -->
-                </div>
+
+        <div id="loading-main" style="display:none;">Đang tải...</div>
+        <div id="error-main" style="display:none;"></div>
+
+        <div class="comics-display-area">
+            <h2 id="results-title">Truyện Mới Cập Nhật</h2>
+            <div id="comics-grid" class="comics-grid">
+                <!-- Comics will be loaded here -->
+            </div>
+            <div class="action-buttons">
+                 <button id="load-default-button" style="display:none;">Xem Truyện Mới</button>
             </div>
         </div>
-        <a href="/" class="button" style="margin-top: 30px; display: inline-block; text-decoration: none;">Quay Về Trang Chủ</a>
+        
+        <a href="/" class="back-to-home-button">Về Trang Chủ</a>
     </div>
+
     <script src="/book-listing.js"></script>
+    <script src="/theme-switcher.js"></script>
+    <script src="/search-gesture-input.js"></script> <!-- NEW SCRIPT -->
 </body>
 </html>
