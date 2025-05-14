@@ -114,6 +114,11 @@ body {
     color: #ff4f84;
 }
 
+.nav-links li.menja a:hover {
+    background: linear-gradient(to right, #ead3ff 100%, #faf4ff 0%);
+    color: #ae54ff;
+}
+
 .nav-links li:last-child {
     margin-top: 0;
 }
