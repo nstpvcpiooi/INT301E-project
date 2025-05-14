@@ -28,8 +28,11 @@ let currentLandmarks = null;
 let trainingData = [];
 const K_NEIGHBORS = 5; // Có thể điều chỉnh
 // DANH SÁCH CÁC KÝ TỰ HỢP LỆ CHO TỪ (Có thể bỏ số nếu chỉ muốn học chữ)
-const VALID_LEARN_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-const LOCAL_STORAGE_KEY = 'aslTrainingDataKNN_v1'; // Dùng chung data đã huấn luyện
+const VALID_LEARN_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '__' ];
+const BACKSPACE_CHAR = '#'; // Add backspace character
+const LOCAL_STORAGE_KEY = 'text'; // From learn.js
+const SPACE_CHAR = '__'
+const SPACE_SIZE = '   '
 let currentRecognizedLetter = null; // Ký tự đang nhận diện được
 
 // --- Learning Logic ---
@@ -202,7 +205,10 @@ function onHandResults(results) {
 function handleLearningRecognition(recognizedLetter) {
      if (!isLearningActive) return; // Thoát nếu không học
 
-     const targetChar = targetWord[currentLetterIndex];
+     let targetChar = targetWord[currentLetterIndex];
+     if(targetChar === ' ') {
+        targetChar = '__'
+     }
 
      if (recognizedLetter === targetChar) {
           // --- Ký tự nhận diện ĐÚNG với ký tự mục tiêu ---
@@ -235,13 +241,13 @@ function handleLearningRecognition(recognizedLetter) {
                          currentLetterTargetElement.textContent = '🏆';
                          currentLetterInstructionElement.textContent = "Tuyệt vời!";
                          
-                         // Cập nhật nút camera thành "Học Từ Khác"
-                         if (recognizing) {
-                             startCameraButton.innerHTML = '<i class="fas fa-redo" style="margin-right: 10px;"></i>Học Từ Khác';
-                             startCameraButton.onclick = () => {
-                                 resetLearning(); // Gọi hàm reset khi click vào nút
-                             };
-                         }
+                        //  // Cập nhật nút camera thành "Học Từ Khác"
+                        //  if (recognizing) {
+                        //      startCameraButton.innerHTML = '<i class="fas fa-redo" style="margin-right: 10px;"></i>Học Từ Khác';
+                        //      startCameraButton.onclick = () => {
+                        //          resetLearning(); // Gọi hàm reset khi click vào nút
+                        //      };
+                        //  }
                          
                          // Vô hiệu hóa input khi hoàn thành
                          wordInputElement.disabled = true;
@@ -317,9 +323,9 @@ function loadTrainingData() {
 // --- 7. Logic Học Từ & UI ---
 
 function setTargetWord(word) {
-    const upperWord = word.toUpperCase().trim();
+    const upperWord = word.toUpperCase();
     // Lọc bỏ các ký tự không hợp lệ
-    const validWord = upperWord.split('').filter(char => VALID_LEARN_CHARS.includes(char)).join('');
+    const validWord = upperWord //upperWord.split('').filter(char => VALID_LEARN_CHARS.includes(char)).join('');
 
     if (validWord.length === 0) {
         alert("Từ không hợp lệ hoặc không chứa ký tự ASL nào (A-Y, 0-9).");
@@ -420,6 +426,7 @@ function highlightCompletedLetter(index) {
 // --- 8. Hàm dừng camera/nhận diện ---
 function stopRecognition() {
      console.log("Stopping recognition...");
+     
      if (recognizing) {
         recognizing = false;
         isLearningActive = false; // Cũng dừng trạng thái học
@@ -476,6 +483,7 @@ wordInputElement.addEventListener('keyup', (event) => {
 startCameraButton.onclick = async () => {
     console.log("Start/Stop Camera button clicked. Recognizing:", recognizing);
 
+    
     if (!recognizing) {
         // --- Bật Camera ---
         if (trainingData.length === 0) {
@@ -518,10 +526,13 @@ startCameraButton.onclick = async () => {
             randomWordButton.disabled = false;
             cancelWordButton.disabled = false;
         }
-
+       
     } else {
         // --- Dừng Camera ---
+
         stopRecognition(); // Gọi hàm dừng đã tạo
+        
+        
     }
 };
 

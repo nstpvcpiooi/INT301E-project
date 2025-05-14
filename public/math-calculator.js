@@ -178,7 +178,7 @@ function onHandResults(results) {
         const features = extractDistanceFeatures(results.multiHandLandmarks[0]);
         prediction = features ? predictKNN(features, K_NEIGHBORS) : "FE Err";
     } else {
-        prediction = "No Hand";
+        prediction = "---";
     }
 
     recognizedCharText.textContent = prediction; // Cập nhật ký tự nhận diện real-time

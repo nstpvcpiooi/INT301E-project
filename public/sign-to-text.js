@@ -20,10 +20,11 @@ let currentLandmarks = null;
 // --- ASL Recognition (KNN) ---
 let trainingData = [];
 const K_NEIGHBORS = 5; // From learn.js
-// Renamed VALID_LEARN_CHARS, kept content
-const VALID_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-const BACKSPACE_CHAR = 'D'; // Add backspace character
-const LOCAL_STORAGE_KEY = 'aslTrainingDataKNN_v1'; // From learn.js
+const VALID_CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '__' ];
+const BACKSPACE_CHAR = '#'; // Add backspace character
+const LOCAL_STORAGE_KEY = 'text'; // From learn.js
+const SPACE_CHAR = '__'
+const SPACE_SIZE = '   '
 
 // --- Sign-to-Text Hold Logic ---
 let currentText = "";               // New: Stores the output text
@@ -193,7 +194,11 @@ function onHandResults(results) {
             } else if (VALID_CHARS.includes(heldChar)) {
                 // --- Process Regular Character ---
                 console.log(`Adding character: ${heldChar}`);
-                currentText += heldChar;
+                if (heldChar == SPACE_CHAR) {
+                    currentText += SPACE_SIZE
+                } else {
+                    currentText += heldChar;
+                }
                 updateOutputText(); // Update UI immediately
                 // Reset hold immediately after adding to prevent repeats
                 heldChar = null;
@@ -207,7 +212,7 @@ function onHandResults(results) {
     } else {
         // --- Sign changed or is invalid/uncertain ---
         // Reset hold state ONLY if the new prediction is potentially valid or clear indicator
-        if (isPotentiallyValidHold || prediction === "---" || prediction === "---") {
+        if (isPotentiallyValidHold || prediction === "---" || prediction === "No Hand") {
              if (heldChar !== null) { // Only log/reset if there WAS a character being held
                   console.log(`Sign changed from ${heldChar} to ${prediction}. Resetting hold.`);
              }
@@ -225,6 +230,7 @@ function onHandResults(results) {
 
     }
 }
+
 
 
 // --- 6. Load Training Data (Identical to learn.js) ---
