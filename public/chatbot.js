@@ -20,8 +20,8 @@ let trainingData = []; // Dữ liệu huấn luyện cho mô hình
 let stablePrediction = null; // Dự đoán ổn định
 let stableStartTime = null; // Thời gian bắt đầu dự đoán ổn định
 let recognizing = false; // Trạng thái nhận diện
-const STABLE_DURATION = 2000; // Thời gian cần giữ ổn định (2 giây)
-const INACTIVITY_DURATION = 1000; // Thời gian không hoạt động (1 giây)
+const STABLE_DURATION = 1500; // Thời gian cần giữ ổn định (2 giây)
+const INACTIVITY_DURATION = 250; // Thời gian không hoạt động (1 giây)
 
 function initializeMediaPipeHands() {
     statusText.textContent = "Đang tải MediaPipe...";
