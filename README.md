@@ -13,7 +13,10 @@
      ```bash
      npm install
      ```
-  3. Chạy ứng dụng ở localhost:3000.
+  3. Chạy ứng dụng ở localhost:3000:
+    ```bash
+     npm start
+     ```
 
 ---
 ## Note
