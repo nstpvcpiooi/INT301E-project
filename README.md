@@ -1,6 +1,23 @@
 # INT3011E 5 - Các vấn đề hiện đại KHMT
 
-Note: Để sử dụng tính năng chatbot, tạo thêm file config.js trong thư mục public, sau đó định nghĩa như sau:
+---
+## Chạy project
+* Yêu cầu với môi trường trước khi chạy
+  - Node.js và npm 
+* Các bước chạy
+  1. Clone project này về, sau đó:
+     ```bash
+     cd INT301E--project
+     ```
+  2. Tải tất cả các dependency cần thiết:
+     ```bash
+     npm install
+     ```
+  3. Chạy ứng dụng ở localhost:3000.
+
+---
+## Note
+Để sử dụng tính năng chatbot, tạo thêm file config.js trong thư mục public, sau đó định nghĩa như sau:
 ```
 const OPENAI_API_KEY = 'your_openai_api_key_here';
 ```
