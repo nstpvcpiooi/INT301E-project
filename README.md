@@ -7,7 +7,7 @@
 * Các bước chạy
   1. Clone project này về, sau đó:
      ```bash
-     cd INT301E--project
+     cd INT301E-project
      ```
   2. Tải tất cả các dependency cần thiết:
      ```bash
