@@ -8,9 +8,136 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        /* Styles from book_style.css will apply for body, .container, #chapter-title etc. */
+        /* We will override/add styles for the new layout here or in book_style.css */
+
+        /* Ensure main content takes up space, gesture panel is overlay */
+        #chapter-content-area {
+            position: relative; /* Needed if gesture panel is absolutely positioned relative to it */
+            width: 100%;
+        }
+
+        .comic-viewer-main { /* New wrapper for just the comic and its nav */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%; /* Take full width available in .container */
+        }
+
+        .images-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 20px;
+            margin-top: 10px; /* Added some top margin */
+        }
+
+        .nav-button { /* Styles from book_style.css */ }
+        #page-info { /* Styles from book_style.css */ }
+
+        .images-display {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 70vh; /* Adjust as needed */
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .images-display img {
+            /* NOW images can take more relative width as gesture panel is out of flow */
+            max-width: calc(50% - 7.5px); /* For two images, adjust if showing one */
+            /* If showing only ONE image at a time, you might use: */
+            /* max-width: 80%; */ 
+            /* max-width: 70vw; */
+            max-height: 75vh; /* Can be a bit taller */
+            object-fit: contain;
+            border: 2px solid var(--image-border);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px var(--card-shadow);
+            background-color: var(--image-bg-placeholder);
+        }
+        
+        .global-navigation { /* Styles from book_style.css */ }
+        .back-button { /* Styles from book_style.css */ }
+
+
+        /* --- GESTURE PANEL - FIXED OVERLAY --- */
+        .gesture-panel-overlay {
+            position: fixed; /* Fixed position relative to the viewport */
+            bottom: 20px;
+            right: 20px;
+            width: 320px; /* Adjust width as desired */
+            padding: 15px;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 12px var(--card-shadow);
+            z-index: 1000; /* Ensure it's above other content */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .gesture-panel-overlay h3 {
+            margin-top: 0; margin-bottom: 5px; color: var(--header-color); font-size: 1.1em;
+        }
+        .gesture-panel-overlay .gesture-instructions { text-align: left; width: 100%;}
+        .gesture-panel-overlay .gesture-instructions p { margin: 3px 0; font-size: 0.8em; color: var(--text-color); opacity: 0.8;}
+        .gesture-panel-overlay .gesture-video-container {
+            width: 100%; 
+            max-width: 280px; /* Max width inside the panel */
+            height: 210px; /* 4:3 ratio */
+            border: 1px solid var(--card-border);
+            background-color: #000;
+            position: relative; border-radius: 5px; overflow: hidden;
+        }
+        .gesture_input_video { display: none; }
+        .gesture_output_canvas { width: 100%; height: 100%; display: block; }
+        
+        .gesture-panel-overlay #toggle-gesture-nav {
+            width: 100%; padding: 8px; font-size: 0.9em;
+            background-color: var(--primary-color);
+            color: var(--button-text-light);
+        }
+        .gesture-panel-overlay #toggle-gesture-nav:hover { background-color: var(--primary-hover); }
+
+        .gesture-panel-overlay #gesture-status, 
+        .gesture-panel-overlay #recognized-gesture-nav { 
+            font-size: 0.85em; margin: 2px 0; color: var(--text-color); opacity: 0.9;
+        }
+        .gesture-panel-overlay #recognized-gesture-nav { font-weight: bold; color: var(--link-color); }
+
+        /* Responsive: On smaller screens, the fixed panel might be too intrusive. */
+        /* You might hide it or make it a toggleable modal. */
+        @media (max-width: 768px) {
+            .gesture-panel-overlay {
+                width: calc(100% - 40px); /* Full width with some margin */
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                /* Or consider making it a modal that can be opened/closed */
+            }
+            .images-display img {
+                max-width: calc(50% - 7.5px); /* Still allow two images if screen is wide enough */
+            }
+        }
+        @media (max-width: 600px) {
+             .images-display {
+                flex-direction: column; /* Stack images on very small screens */
+                align-items: center;
+             }
+             .images-display img {
+                max-width: 90vw; /* Allow images to be wider when stacked */
+             }
+        }
+
+    </style>
 </head>
 <body class="">
-    <!-- ***** CRITICAL: Ensure this button ID matches the ID in theme-switcher.js ***** -->
     <button id="theme-toggle-button">Chuyển Theme</button>
 
     <div class="container">
@@ -20,34 +147,18 @@
         <div id="chapter-content-area" style="display:none;">
             <h1 id="chapter-title"></h1>
 
-            <div class="main-content-wrapper">
-                <div class="comic-viewer">
-                    <div class="images-navigation">
-                        <button id="prev-page" class="nav-button"><</button>
-                        <span id="page-info"></span>
-                        <button id="next-page" class="nav-button">></button>
-                    </div>
-                    <div id="images-display" class="images-display">
-                        <!-- Comic images will be loaded here -->
-                    </div>
+            <!-- Comic Viewer Area -->
+            <div class="comic-viewer-main">
+                <div class="images-navigation">
+                    <button id="prev-page" class="nav-button"><</button>
+                    <span id="page-info"></span>
+                    <button id="next-page" class="nav-button">></button>
                 </div>
-
-                <div class="gesture-panel">
-                    <h3>Điều Khiển Bằng Cử Chỉ</h3>
-                    <div class="gesture-video-container">
-                        <video class="gesture_input_video" id="gesture_input_video" autoplay playsinline></video>
-                        <canvas class="gesture_output_canvas" id="gesture_output_canvas" width="300" height="225"></canvas>
-                    </div>
-                    <button id="toggle-gesture-nav">Bật Điều Khiển Cử Chỉ</button>
-                    <div class="gesture-instructions">
-                        <p><strong>Hướng dẫn:</strong></p>
-                        <p>- Giơ cử chỉ 'A' để <strong>Qua Trang Sau</strong>.</p>
-                        <p>- Giơ cử chỉ 'B' để <strong>Về Trang Trước</strong>.</p>
-                    </div>
-                    <p id="gesture-status">Trạng thái: Chưa kích hoạt</p>
-                    <p>Nhận diện: <span id="recognized-gesture-nav">---</span></p>
+                <div id="images-display" class="images-display">
+                    <!-- Comic images will be loaded here -->
                 </div>
             </div>
+            <!-- End Comic Viewer Area -->
 
             <div class="global-navigation">
                 <button id="back-button" class="back-button">Quay Lại Trang Trước</button>
@@ -55,9 +166,26 @@
         </div>
     </div>
 
+    <!-- GESTURE PANEL - MOVED OUTSIDE AND STYLED AS AN OVERLAY -->
+    <div class="gesture-panel-overlay" id="gesture-panel"> <!-- Added ID for potential JS interaction -->
+        <h3>Điều Khiển Bằng Cử Chỉ</h3>
+        <div class="gesture-video-container">
+            <video class="gesture_input_video" id="gesture_input_video" autoplay playsinline></video>
+            <canvas class="gesture_output_canvas" id="gesture_output_canvas" width="280" height="210"></canvas> <!-- Adjusted canvas size -->
+        </div>
+        <button id="toggle-gesture-nav">Bật Điều Khiển Cử Chỉ</button>
+        <div class="gesture-instructions">
+            <p><strong>Hướng dẫn:</strong></p>
+            <p>- Giơ cử chỉ 'A' để <strong>Qua Trang Sau</strong>.</p>
+            <p>- Giơ cử chỉ 'B' để <strong>Về Trang Trước</strong>.</p>
+        </div>
+        <p id="gesture-status">Trạng thái: Chưa kích hoạt</p>
+        <p>Nhận diện: <span id="recognized-gesture-nav">---</span></p>
+    </div>
+    <!-- END GESTURE PANEL -->
+
     <script src="/chapter-view.js"></script>
     <script src="/gesture-navigation.js"></script>
-    <!-- ***** CRITICAL: Ensure this script path is correct and the file exists ***** -->
     <script src="/theme-switcher.js"></script> 
 </body>
 </html>
