@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ASL Dictionary - SignLearn</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Assuming styles.css contains your general sidebar and layout styles -->
+    <link rel="stylesheet" href="styles.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,85 +15,91 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <style>
+        /* Styles specific to dictionary.html - Luyện tập image box */
+        .dictionary-layout .right-side .target-section .practice-area .target-char-box {
+            /* --- INCREASE THESE VALUES for the container of the image --- */
+            width: 300px;  /* EXAMPLE: Desired width of the box */
+            height: 300px; /* EXAMPLE: Desired height of the box */
+            /* --- --- */
+
+            background: #f3f4f6; /* Light background for the box */
+            border: 2px solid #e5e7eb; /* Light border */
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth feedback transition */
+            margin: 20px auto; /* More margin for a larger box */
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* Styles for the image itself within that specific box */
+        .dictionary-layout .right-side .target-section .practice-area .target-char-box #target-char-image {
+            max-width: 200%;   /* Image will take up 95% of the box width */
+            max-height: 200%;  /* Image will take up 95% of the box height */
+            object-fit: contain; /* Ensures the whole image is visible, maintains aspect ratio */
+            display: block; /* Removes extra space below inline images */
+        }
+
+        /* Fallback text styling if image doesn't load */
+        .dictionary-layout .right-side .target-section .practice-area .target-char-box #target-char-text {
+            display: none; /* Hidden by default when image is present */
+            font-size: 6rem; /* Large text if image fails */
+            font-weight: bold;
+            color: #4A5568;
+        }
+
+        /* Styles for correct/incorrect feedback on the box */
+        .dictionary-layout .right-side .target-section .practice-area .target-char-box.correct {
+            background-color: #dcfce7; /* Greenish for correct */
+            border-color: #86efac;
+        }
+
+        .dictionary-layout .right-side .target-section .practice-area .target-char-box.incorrect {
+            background-color: #fee2e2; /* Reddish for incorrect */
+            border-color: #fca5a5;
+        }
+
+        /* Ensure video container in camera-section has a defined size */
+        .dictionary-layout .camera-section .video-container {
+             width: 100%; 
+             max-width: 640px; /* Or your preferred max width */
+             height: 480px;    /* Or adjust to your preferred aspect ratio */
+             margin: 0 auto 20px auto; /* Center it and add bottom margin */
+             background-color: #000; /* Keep video background dark for visibility */
+        }
+        .output_canvas {
+            /* The transform is already in your HTML, this is just a note */
+            /* -webkit-transform: scaleX(-1); transform: scaleX(-1); */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Sidebar -->
+        <!-- Sidebar (Assuming this structure comes from your styles.css or is standard) -->
         <nav class="sidebar">
-<!--            <div class="logo">-->
-<!--                <i class="fas fa-hands-sign-language"></i>-->
-<!--                <span>SignLearn</span>-->
-<!--            </div>-->
             <ul class="nav-links">
-                <li>
-                    <a href="/">
-                        <i class="fas fa-house"></i>
-                        <span>Home</span>
-                    </a>
-                </li>
-                <li class="active">
-                    <a href="/letter">
-                        <i class="fas fa-book-open"></i>
-                        <span>Dictionary</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/sign-to-text">
-                        <i class="fas fa-language"></i>
-                        <span>Translate</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/learn">
-                        <i class="fas fa-graduation-cap"></i>
-                        <span>Learn</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/math-calculator">
-                        <i class="fas fa-calculator"></i>
-                        <span>Calculator</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/hangman">
-                        <i class="fas fa-gamepad"></i>
-                        <span>Game</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/chatbot">
-                        <i class="fa-solid fa-comments"></i>
-                        <span>Chatbot</span>
-                    </a>
-                </li>
+                <li><a href="/"><i class="fas fa-house"></i><span>Home</span></a></li>
+                <li class="active"><a href="/letter"><i class="fas fa-book-open"></i><span>Dictionary</span></a></li>
+                <li><a href="/sign-to-text"><i class="fas fa-language"></i><span>Translate</span></a></li>
+                <li><a href="/learn"><i class="fas fa-graduation-cap"></i><span>Learn</span></a></li>
+                <li><a href="/math-calculator"><i class="fas fa-calculator"></i><span>Calculator</span></a></li>
+                <li><a href="/hangman"><i class="fas fa-gamepad"></i><span>Game</span></a></li>
+                <li><a href="/chatbot"><i class="fa-solid fa-comments"></i><span>Chatbot</span></a></li>
             </ul>
             <ul class="nav-links nav-bottom">
-                <li class="book-tab">
-                    <a href="/book">
-                        <i class="fa-solid fa-glasses"></i>
-                        <span>Comic Books</span>
-                    </a>
-                </li>
-                <li class="menja">
-                    <a href="/menja">
-                        <i class="fa-solid fa-dice-d6"></i>
-                        <span>Menja</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/settings">
-                        <i class="fas fa-gear"></i>
-                        <span>Settings</span>
-                    </a>
-                </li>
+                <li class="book-tab"><a href="/book"><i class="fa-solid fa-glasses"></i><span>Comic Books</span></a></li>
+                <li class="menja"><a href="/menja"><i class="fa-solid fa-dice-d6"></i><span>Menja</span></a></li>
+                <li><a href="/settings"><i class="fas fa-gear"></i><span>Settings</span></a></li>
             </ul>
         </nav>
 
         <!-- Main Content -->
         <main class="main-content">
             <div class="dictionary-container">
-                <h1>ASL Dictionary</h1>
+                <h1>ASL Dictionary & Practice</h1>
                 
                 <div class="dictionary-layout">
                     <!-- Left side - Camera -->
@@ -100,7 +107,7 @@
                         <div class="video-container">
                             <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
                             <canvas class="output_canvas" id="output_canvas" width="640" height="480"
-                                    style="  -webkit-transform: scaleX(-1); transform: scaleX(-1);"></canvas>
+                                    style=" -webkit-transform: scaleX(-1); transform: scaleX(-1);"></canvas>
                         </div>
                         <div class="controls">
                             <button id="start-button" class="btn-primary">
@@ -117,7 +124,7 @@
                                 <i class="fas fa-chevron-down toggle-icon"></i>
                             </div>
                             <div class="instruction-content">
-                                Nhấn nút "Bắt đầu" để khởi động camera, đưa tay vào khung hình camera và thực hiện cử chỉ ASL tương ứng
+                                Nhấn nút "Bắt đầu" để khởi động camera, đưa tay vào khung hình camera và thực hiện cử chỉ ASL tương ứng với hình ảnh hiển thị.
                             </div>
                         </div>
                     </div>
@@ -130,7 +137,6 @@
                                 <div class="recognized-char-box">
                                     <p id="recognized-char">---</p>
                                 </div>
-                                
                             </div>
                         </div>
 
@@ -139,11 +145,9 @@
                             <div class="practice-area">
                                 <div class="target-char-display">
                                     <div class="target-char-box">
-                                        <p id="target-char">---</p>
+                                        <img id="target-char-image" src="" alt="Ký tự mục tiêu">
+                                        <p id="target-char-text" style="display: none; font-size: 6rem; font-weight: bold;">---</p>
                                     </div>
-                                </div>
-                                <div class="verification-area">
-                                    <p id="verification-result" class="verification-message"></p>
                                 </div>
                                 <div class="practice-buttons">
                                     <button id="next-char-button" class="btn-secondary">
@@ -163,7 +167,7 @@
         </main>
     </div>
 
-    <!--hide-->
+    <!-- Data collection section is hidden via CSS, can be removed if not used on this page -->
     <div class="data-collection" style="display: none;">
         <div>
             <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
