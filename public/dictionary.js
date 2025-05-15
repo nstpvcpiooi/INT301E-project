@@ -259,7 +259,7 @@ function verifySign(predictedChar) {
         verificationTimeout = setTimeout(() => {
             resetTargetBoxColor();
             getNextChar(); // Automatically move to next char
-        }, 2000); // 2 seconds delay
+        }, 800); // 2 seconds delay
     } else {
         targetCharBoxElement.classList.add('incorrect');
         targetCharBoxElement.classList.remove('correct');
