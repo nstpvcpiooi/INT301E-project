@@ -209,9 +209,11 @@ body {
 
 /* Dictionary page specific styles */
 .dictionary-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px;
+    width: 80%; /* hoặc một giá trị cố định như 500px */
+    margin-left: auto;
+    margin-right: auto;
+    /* và sau đó dùng một trong các cách trên để căn giữa nội dung bên trong nó */
+    text-align: center;
 }
 
 .video-container {
