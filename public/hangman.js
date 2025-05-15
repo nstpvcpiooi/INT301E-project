@@ -5,104 +5,55 @@ const videoElement = document.getElementById('input_video');
 const canvasElement = document.getElementById('output_canvas');
 const canvasCtx = canvasElement.getContext('2d');
 const statusText = document.getElementById('status-text');
-const recognizedCharText = document.getElementById('recognized-char');
+const recognizedCharText = document.getElementById('recognized-char-hangman'); // Specific ID
 const startCameraButton = document.getElementById('start-camera-button');
-// const submitGuessButton = document.getElementById('submit-guess-button'); // REMOVED - using hold logic
+// const submitGuessButton = document.getElementById('submit-guess-button-hangman'); // No longer needed
 const restartGameButton = document.getElementById('restart-game-button');
 const wordToGuessElement = document.getElementById('word-to-guess');
-const guessesLeftElement = document.getElementById('guesses-left');
-const wrongGuessesElement = document.getElementById('wrong-guesses');
-const gameStatusElement = document.getElementById('game-status');
-const hangmanFigureElement = document.getElementById('hangman-figure'); // NEW
-const holdIndicatorElement = document.getElementById('hold-indicator-hangman'); // NEW
+const guessesLeftElement = document.getElementById('guesses-left-display'); // Specific ID
+const wrongGuessesElement = document.getElementById('wrong-guesses-display'); // Specific ID
+const gameStatusElement = document.getElementById('game-status-message'); // Specific ID
+const holdIndicatorElement = document.getElementById('hold-indicator-hangman'); // Specific ID
+
+// Hangman Figure Parts
+const hangmanParts = [
+    document.querySelector('.hangman-figure-container .head'),
+    document.querySelector('.hangman-figure-container .body'),
+    document.querySelector('.hangman-figure-container .arm-left'),
+    document.querySelector('.hangman-figure-container .arm-right'),
+    document.querySelector('.hangman-figure-container .leg-left'),
+    document.querySelector('.hangman-figure-container .leg-right')
+];
+// Also hide gallows initially if you want them to appear with the first wrong guess, or show them always.
+const gallowsParts = document.querySelectorAll('.hangman-figure-container .gallows');
+
 
 // --- MediaPipe & Camera ---
 let mediaPipeHands = null;
 let camera = null;
-let recognizing = false; // Is camera & MediaPipe active?
+let recognitionActive = false; // Changed from 'recognizing' for clarity
 
 // --- ASL Recognition (KNN) ---
 let trainingData = [];
 const K_NEIGHBORS = 5;
-// Only letters for Hangman, no numbers. Ensure your 'text' dataset has these.
-const ASL_ALPHABET_VALID_HANGMAN = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y'];
-const LOCAL_STORAGE_KEY = 'text'; // Load from the main alphanumeric dataset
-
-// --- Hold Logic for Guessing ---
-let heldLetterHangman = null;
-let holdStartTimeHangman = 0;
-const HOLD_DURATION_MS_HANGMAN = 1000; // 1 second
-let isProcessingHoldHangman = false;
-let lastRecognizedLetterForHold = null; // To track if the letter changes during hold
+const ASL_ALPHABET_VALID_FOR_GAME = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y']; // Only letters for typical Hangman
+const LOCAL_STORAGE_KEY = 'text'; // Or 'aslAlphanumericData_v1' - ensure this matches your main data
+let currentRecognizedLetter = null;
 
 // --- Hangman Game Logic ---
 const WORD_LIST = ["PYTHON", "JAVASCRIPT", "HANGMAN", "MEDIAPIPE", "CAMERA", "NODEJS", "EXPRESS", "GITHUB", "APPLE", "BANANA", "ORANGE", "COMPUTER", "SCIENCE"];
 const MAX_WRONG_GUESSES = 6;
 let currentWord = '';
 let guessedLetters = new Set();
-let wrongGuessesCount = 0; // Renamed from wrongGuesses to avoid conflict
+let wrongGuessesCount = 0; // Renamed for clarity
 let displayWord = '';
 let gameState = 'playing'; // 'playing', 'won', 'lost'
 
-// --- Hangman Figure Stages ---
-const HANGMAN_STAGES = [
-`
-  +---+
-  |   |
-      |
-      |
-      |
-      |
-=========`,
-`
-  +---+
-  |   |
-  O   |
-      |
-      |
-      |
-=========`,
-`
-  +---+
-  |   |
-  O   |
-  |   |
-      |
-      |
-=========`,
-`
-  +---+
-  |   |
-  O   |
- /|   |
-      |
-      |
-=========`,
-`
-  +---+
-  |   |
-  O   |
- /|\\  |
-      |
-      |
-=========`,
-`
-  +---+
-  |   |
-  O   |
- /|\\  |
- /    |
-      |
-=========`,
-`
-  +---+
-  |   |
-  O   |
- /|\\  |
- / \\  |
-      |
-=========`,
-];
+// --- Hold Logic for Guessing ---
+let heldCharForGuess = null;
+let holdStartTimeForGuess = 0;
+const HOLD_DURATION_FOR_GUESS_MS = 1000; // 1 second
+let isProcessingGuessHold = false;
 
 
 // --- 1. Initialize MediaPipe Hands ---
@@ -110,26 +61,26 @@ function initializeMediaPipeHands() {
     statusText.textContent = "Đang tải MediaPipe...";
     mediaPipeHands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
     mediaPipeHands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
-    mediaPipeHands.onResults(onHandResults);
+    mediaPipeHands.onResults(onHandResultsHangman);
     statusText.textContent = "MediaPipe sẵn sàng. Tải dữ liệu mẫu...";
-    loadTrainingData();
+    loadTrainingDataHangman();
 }
 
 // --- 2. Initialize Camera ---
-async function initializeCamera() {
+async function initializeCameraHangman() {
     statusText.textContent = 'Đang khởi tạo webcam...';
     if (!videoElement || typeof Camera === 'undefined') {
         statusText.textContent = 'Lỗi: Thiếu thành phần camera.'; return false;
     }
     camera = new Camera(videoElement, {
         onFrame: async () => {
-            if (!mediaPipeHands || !recognizing) return;
+            if (!mediaPipeHands || !recognitionActive) return;
             if (videoElement.readyState >= HTMLMediaElement.HAVE_METADATA && videoElement.videoWidth > 0) {
                 try { await mediaPipeHands.send({ image: videoElement }); }
                 catch (e) { console.error("Lỗi gửi frame (hangman):", e); }
             }
         },
-        width: 640, height: 480
+        width: 400, height: 300 // Match canvas in HTML
     });
     try {
         await camera.start();
@@ -137,12 +88,12 @@ async function initializeCamera() {
         return true;
     } catch (err) {
         console.error("Lỗi camera (hangman): ", err);
-        statusText.textContent = `Lỗi bật webcam: ${err.name}.`;
+        statusText.textContent = `Lỗi camera: ${err.name}.`;
         return false;
     }
 }
 
-// --- 3. Feature Extraction (Identical) ---
+// --- 3. Feature Extraction & 4. KNN (Identical to your other scripts) ---
 function extractDistanceFeatures(landmarks) {
     if (!landmarks || landmarks.length !== 21) return null;
     const features = []; const wrist = landmarks[0];
@@ -158,15 +109,15 @@ function extractDistanceFeatures(landmarks) {
         features.push(dist / handScale);
     } return features;
 }
-
-// --- 4. KNN Prediction (Identical) ---
 function euclideanDistance(arr1, arr2) {
     if (!arr1 || !arr2 || arr1.length !== arr2.length) return Infinity;
     let sum = 0; for (let i = 0; i < arr1.length; i++) { sum += (arr1[i] - arr2[i]) ** 2; }
     return Math.sqrt(sum);
 }
 function predictKNN(currentFeatures, k) {
-    if (trainingData.length < k || !currentFeatures) return trainingData.length === 0 ? "Chưa có data" : "Cần data";
+    if (!trainingData || trainingData.length < k || !currentFeatures) {
+        return trainingData && trainingData.length === 0 ? "Chưa có data" : "Cần data";
+    }
     const distances = trainingData.map(sample => ({ label: sample.label, distance: euclideanDistance(sample.features, currentFeatures) })).filter(item => isFinite(item.distance));
     if (distances.length === 0) return "Lỗi khoảng cách";
     distances.sort((a, b) => a.distance - b.distance);
@@ -179,85 +130,74 @@ function predictKNN(currentFeatures, k) {
 }
 
 // --- 5. Process Hand Results & Hold Logic ---
-let lastPredictionTimeHangman = 0;
-const PREDICTION_INTERVAL_HANGMAN = 200; // Check more frequently for responsiveness
-
-function onHandResults(results) {
+function onHandResultsHangman(results) {
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     if (results.image) { // Draw camera feed
-        // Canvas is already flipped by CSS, so draw directly
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
     }
-    let prediction = "---";
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         const handLandmarks = results.multiHandLandmarks[0];
+        // Draw landmarks on the non-mirrored canvas (as CSS handles mirroring)
         if (typeof drawConnectors === 'function' && typeof HAND_CONNECTIONS !== 'undefined') {
-            drawConnectors(canvasCtx, handLandmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 3 });
-            drawLandmarks(canvasCtx, handLandmarks, { color: '#FF0000', lineWidth: 2, radius: 3 });
+            drawConnectors(canvasCtx, handLandmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
         }
-        canvasCtx.restore(); // Restore after drawing landmarks if canvas was transformed for it
+        if (typeof drawLandmarks === 'function') {
+            drawLandmarks(canvasCtx, handLandmarks, { color: '#FF0000', lineWidth: 1, radius: 3 });
+        }
+    }
+    canvasCtx.restore();
 
-        const currentTime = Date.now();
-        if (recognizing && (currentTime - lastPredictionTimeHangman > PREDICTION_INTERVAL_HANGMAN)) {
-            lastPredictionTimeHangman = currentTime;
-            const features = extractDistanceFeatures(handLandmarks);
-            prediction = features ? predictKNN(features, K_NEIGHBORS) : "Lỗi FE";
-        } else if (recognizing) {
-            prediction = recognizedCharText.textContent; // Keep last prediction if not interval
-        }
+    let prediction = "---";
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const features = extractDistanceFeatures(results.multiHandLandmarks[0]);
+        prediction = features ? predictKNN(features, K_NEIGHBORS) : "Lỗi FE";
     } else {
         prediction = "Không thấy tay";
-        canvasCtx.restore(); // Ensure restore if no landmarks
     }
     recognizedCharText.textContent = prediction;
-    lastRecognizedLetterForHold = prediction; // Update for hold logic
 
-    // Hold Logic for Guessing
-    if (!recognizing || gameState !== 'playing') {
+    if (!recognitionActive || gameState !== 'playing') {
         holdIndicatorElement.textContent = '';
         return;
     }
 
-    const isValidGuessChar = ASL_ALPHABET_VALID_HANGMAN.includes(lastRecognizedLetterForHold);
+    const isValidGuessChar = ASL_ALPHABET_VALID_FOR_GAME.includes(prediction);
 
-    if (isValidGuessChar && lastRecognizedLetterForHold === heldLetterHangman) {
-        const holdDuration = Date.now() - holdStartTimeHangman;
-        const remainingTime = Math.max(0, HOLD_DURATION_MS_HANGMAN - holdDuration);
+    if (isValidGuessChar && prediction === heldCharForGuess) {
+        const holdDuration = Date.now() - holdStartTimeForGuess;
+        const remainingTime = Math.max(0, HOLD_DURATION_FOR_GUESS_MS - holdDuration);
 
-        if (holdDuration >= HOLD_DURATION_MS_HANGMAN && !isProcessingHoldHangman) {
-            isProcessingHoldHangman = true;
-            holdIndicatorElement.textContent = `Đã đoán: ${heldLetterHangman}`;
-            console.log(`Guess '${heldLetterHangman}' confirmed.`);
-            handleGuess(heldLetterHangman); // Process the guess
-
-            // Reset for next potential hold, even if it's the same letter again
-            // This prevents immediate re-guessing of the same letter if hand doesn't move
-            heldLetterHangman = null;
-            holdStartTimeHangman = 0;
-            // isProcessingHoldHangman will be reset when the recognized sign changes
-        } else if (!isProcessingHoldHangman) {
-            holdIndicatorElement.textContent = `Giữ '${heldLetterHangman}' (${(remainingTime/1000).toFixed(1)}s)...`;
+        if (holdDuration >= HOLD_DURATION_FOR_GUESS_MS && !isProcessingGuessHold) {
+            isProcessingGuessHold = true;
+            holdIndicatorElement.textContent = `Đã đoán: ${heldCharForGuess}`;
+            console.log(`Guess '${heldCharForGuess}' held. Submitting.`);
+            handleGuess(heldCharForGuess);
+            
+            // Reset for next potential hold, even if it's the same character again after a pause
+            heldCharForGuess = null; 
+            holdStartTimeForGuess = 0;
+            // isProcessingGuessHold will be reset when the sign changes
+        } else if (!isProcessingGuessHold) {
+            holdIndicatorElement.textContent = `Giữ '${heldCharForGuess}' (${(remainingTime/1000).toFixed(1)}s)...`;
         }
     } else {
-        // Sign changed or is not a valid guess character
-        if (isValidGuessChar || lastRecognizedLetterForHold === "---" || lastRecognizedLetterForHold === "Không thấy tay") {
-            if (heldLetterHangman !== null && heldLetterHangman !== lastRecognizedLetterForHold) {
-                 console.log(`Hangman: Sign changed from ${heldLetterHangman} to ${lastRecognizedLetterForHold}. Resetting hold.`);
+        if (isValidGuessChar || prediction === "---" || prediction === "Không thấy tay") {
+            if (heldCharForGuess !== null && heldCharForGuess !== prediction) {
+                 console.log(`Sign for guess changed from ${heldCharForGuess} to ${prediction}. Resetting hold.`);
             }
-            heldLetterHangman = lastRecognizedLetterForHold; // Start tracking new char
-            holdStartTimeHangman = Date.now();
-            isProcessingHoldHangman = false; // Allow processing for new hold
+            heldCharForGuess = prediction;
+            holdStartTimeForGuess = Date.now();
+            isProcessingGuessHold = false;
             holdIndicatorElement.textContent = '';
         } else {
-            // If prediction is "?", "Lỗi FE", etc.
-            holdIndicatorElement.textContent = '';
+            holdIndicatorElement.textContent = ''; // Not a valid char for guessing
         }
     }
 }
 
 // --- 6. Load Training Data ---
-function loadTrainingData() {
+function loadTrainingDataHangman() {
     const data = localStorage.getItem(LOCAL_STORAGE_KEY);
     trainingData = [];
     let loadedCount = 0;
@@ -270,176 +210,171 @@ function loadTrainingData() {
             }
         } catch(e) { console.error("Lỗi parse data (hangman):", e); }
     }
-    console.log(`Hangman: Đã tải ${loadedCount} mẫu từ key '${LOCAL_STORAGE_KEY}'.`);
-    if (loadedCount < K_NEIGHBORS) {
-         statusText.textContent = "Cảnh báo: Ít dữ liệu mẫu. Cần huấn luyện thêm.";
-         // alert("Không đủ dữ liệu huấn luyện ASL. Trò chơi có thể không chính xác.");
-         startCameraButton.disabled = true; // Disable if not enough data
+    console.log(`Đã tải ${loadedCount} mẫu huấn luyện cho Hangman.`);
+    if (loadedCount < K_NEIGHBORS) { // Need at least K samples
+         statusText.textContent = "Cảnh báo: Không đủ dữ liệu mẫu!";
+         alert("Không đủ dữ liệu huấn luyện ASL. Vui lòng huấn luyện thêm ở trang chính.");
+         startCameraButton.disabled = true;
     } else {
         statusText.textContent = `Sẵn sàng (${loadedCount} mẫu). Nhấn 'Bật Camera'`;
         startCameraButton.disabled = false;
     }
 }
 
-// --- 7. Hangman Game Logic (Adhering to Rules) ---
+// --- 7. Hangman Game Logic ---
 function selectWord() {
     return WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)].toUpperCase();
 }
 
 function updateHangmanFigure() {
-    hangmanFigureElement.textContent = HANGMAN_STAGES[wrongGuessesCount];
+    gallowsParts.forEach(part => part.style.display = 'block'); // Show gallows
+    for (let i = 0; i < hangmanParts.length; i++) {
+        hangmanParts[i].style.display = (i < wrongGuessesCount) ? 'block' : 'none';
+    }
 }
 
 function updateDisplay() {
-    // Rule 7: Display current word, guesses left, wrong letters
-    displayWord = currentWord.split('')
-        .map(letter => (guessedLetters.has(letter) ? ` ${letter} ` : ' _ '))
-        .join('');
-    wordToGuessElement.textContent = displayWord.trim();
+    displayWord = currentWord.split('').map(letter => (guessedLetters.has(letter) ? letter : '_')).join(' ');
+    wordToGuessElement.textContent = displayWord;
     guessesLeftElement.textContent = MAX_WRONG_GUESSES - wrongGuessesCount;
-    wrongGuessesElement.textContent = [...guessedLetters]
-        .filter(letter => !currentWord.includes(letter))
-        .join(', ');
+    wrongGuessesElement.textContent = [...guessedLetters].filter(letter => !currentWord.includes(letter)).join(', ');
     updateHangmanFigure();
+
+    gameStatusElement.textContent = '';
+    gameStatusElement.className = 'game-status-message'; // Reset class
+    if (gameState === 'won') {
+        gameStatusElement.textContent = '🎉 Bạn đã thắng! 🎉';
+        gameStatusElement.classList.add('won');
+        stopGameRecognition();
+    } else if (gameState === 'lost') {
+        gameStatusElement.textContent = `💀 Bạn đã thua! Từ cần đoán là: ${currentWord} 💀`;
+        gameStatusElement.classList.add('lost');
+        stopGameRecognition();
+    }
 }
 
 function checkGameState() {
     const wordComplete = currentWord.split('').every(letter => guessedLetters.has(letter));
     if (wordComplete) {
-        gameState = 'won'; // Rule 6: Win
-        gameStatusElement.textContent = '🎉 CHÚC MỪNG! BẠN ĐÃ THẮNG! 🎉';
-        gameStatusElement.className = 'game-message success';
-        stopGameRecognition();
+        gameState = 'won';
     } else if (wrongGuessesCount >= MAX_WRONG_GUESSES) {
-        gameState = 'lost'; // Rule 3 & 6: Lose
-        gameStatusElement.textContent = `💀 RẤT TIẾC! BẠN ĐÃ THUA. Từ cần đoán là: ${currentWord} 💀`;
-        gameStatusElement.className = 'game-message error';
-        stopGameRecognition();
+        gameState = 'lost';
     } else {
         gameState = 'playing';
     }
 }
 
-function handleGuess(letter) { // Rule 4: Player guesses a letter
-    if (!letter || gameState !== 'playing' || !ASL_ALPHABET_VALID_HANGMAN.includes(letter)) {
-        console.log("Invalid guess or game not playing:", letter, gameState);
-        return;
-    }
-    letter = letter.toUpperCase();
+function handleGuess(letter) {
+    if (!letter || gameState !== 'playing' || !ASL_ALPHABET_VALID_FOR_GAME.includes(letter)) return;
 
-    if (guessedLetters.has(letter)) { // Rule 5: Already guessed
-        statusText.textContent = `Bạn đã đoán chữ '${letter}' rồi. Thử chữ khác.`;
-        // No penalty for re-guessing
+    letter = letter.toUpperCase();
+    if (guessedLetters.has(letter)) {
+        statusText.textContent = `Bạn đã đoán chữ '${letter}' rồi.`;
+        setTimeout(() => { if(recognitionActive) statusText.textContent = 'Webcam đang chạy. Thực hiện thủ ngữ...'; }, 2000);
         return;
     }
     guessedLetters.add(letter);
 
-    if (currentWord.includes(letter)) { // Rule 5: Correct guess
-        statusText.textContent = `Chính xác! Chữ '${letter}' có trong từ.`;
-    } else { // Rule 5: Incorrect guess
+    if (currentWord.includes(letter)) {
+        statusText.textContent = `Đoán đúng: '${letter}'!`;
+    } else {
         wrongGuessesCount++;
-        statusText.textContent = `Sai rồi! Chữ '${letter}' không có trong từ.`;
+        statusText.textContent = `Đoán sai: '${letter}'!`;
     }
+    setTimeout(() => { if(recognitionActive && gameState === 'playing') statusText.textContent = 'Webcam đang chạy. Thực hiện thủ ngữ...'; }, 2000);
+
     checkGameState();
     updateDisplay();
 }
 
-function startGame() { // Rule 1 & 2
+function startGame() {
     currentWord = selectWord();
     guessedLetters = new Set();
     wrongGuessesCount = 0;
     gameState = 'playing';
-    heldLetterHangman = null; // Reset hold state
-    holdStartTimeHangman = 0;
-    isProcessingHoldHangman = false;
-    lastRecognizedLetterForHold = null;
-
+    heldCharForGuess = null;
+    holdStartTimeForGuess = 0;
+    isProcessingGuessHold = false;
     recognizedCharText.textContent = "---";
     holdIndicatorElement.textContent = "";
-    gameStatusElement.textContent = "";
-    gameStatusElement.className = 'game-message';
 
-    console.log("Hangman: New game! Word (dev only):", currentWord);
-    updateDisplay(); // Initial display
+    console.log("Hangman - New Word (dev only):", currentWord);
+    updateDisplay(); // Initial display setup
 
-    if (recognizing) {
-        statusText.textContent = 'Webcam đang chạy. Thực hiện thủ ngữ...';
+    if (recognitionActive) {
+        statusText.textContent = 'Game mới! Thực hiện thủ ngữ...';
     } else {
         statusText.textContent = `Game mới! Nhấn 'Bật Camera'`;
     }
 }
 
 function stopGameRecognition() { // Called when game ends (win/lose)
-     if (recognizing) {
-        recognizing = false; // Stop recognition processing
-        // Don't stop camera here, user might want to restart
-        // if (camera && camera.stop) camera.stop();
-        // startCameraButton.textContent = "Bật Camera & Nhận Diện";
-        statusText.textContent = "Game đã kết thúc. Nhấn 'Chơi Lại'.";
-        recognizedCharText.textContent = "---";
-        holdIndicatorElement.textContent = "";
-     }
+    if (recognitionActive) {
+        recognitionActive = false; // Stop processing new gestures for game
+        // Camera can remain on if user wants to restart, or stop it:
+        // if (camera) camera.stop();
+        // startCameraButton.textContent = "Bật Camera";
+        holdIndicatorElement.textContent = "Game đã kết thúc.";
+    }
 }
-function stopFullRecognitionAndCamera() { // Called by "Dừng Camera" button
-     if (recognizing) { // If it was active
-        recognizing = false;
-        if (camera && camera.stop) {
-            try { camera.stop(); } catch(e) { console.error("Error stopping camera", e); }
-        }
+function fullStopRecognitionAndCamera() { // Called by button or if leaving page
+     if (camera) {
+        try { camera.stop(); } catch(e) { console.error("Error stopping camera", e); }
      }
-     // Reset UI regardless of previous state if button is "Dừng Camera"
-    startCameraButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bật Camera';
-    statusText.textContent = "Đã dừng camera. Nhấn 'Bật Camera' để chơi.";
-    recognizedCharText.textContent = "---";
-    holdIndicatorElement.textContent = "";
-    heldLetterHangman = null;
-    isProcessingHoldHangman = false;
+     recognitionActive = false;
+     isProcessingGuessHold = false;
+     heldCharForGuess = null;
+     startCameraButton.innerHTML = '<i class="fa-solid fa-camera" style="margin-right: 8px;"></i>Bật Camera';
+     statusText.textContent = "Đã dừng camera. Nhấn Bật Camera để chơi.";
+     recognizedCharText.textContent = "---";
+     holdIndicatorElement.textContent = "";
 }
 
 
-// --- 8. Event Listeners ---
+// --- Event Listeners ---
 startCameraButton.onclick = async () => {
-    if (!recognizing) {
+    if (!recognitionActive) {
         if (trainingData.length === 0) {
              alert("Không có dữ liệu huấn luyện. Không thể bắt đầu nhận diện.");
              return;
         }
-        startCameraButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 10px;"></i>Đang bật...';
+        startCameraButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Đang bật...';
         startCameraButton.disabled = true;
-        const cameraStarted = await initializeCamera();
+        const cameraStarted = await initializeCameraHangman();
         if (cameraStarted) {
-            recognizing = true;
-            startCameraButton.innerHTML = '<i class="fa-solid fa-stop" style="margin-right: 10px;"></i>Dừng Camera';
+            recognitionActive = true;
+            startCameraButton.innerHTML = '<i class="fa-solid fa-video-slash" style="margin-right: 8px;"></i>Tắt Camera';
             if (gameState !== 'playing') startGame(); // Start a new game if previous one ended
             else statusText.textContent = 'Webcam đang chạy. Thực hiện thủ ngữ...';
         } else {
-            startCameraButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bật Camera';
+            startCameraButton.innerHTML = '<i class="fa-solid fa-camera" style="margin-right: 8px;"></i>Bật Camera';
         }
         startCameraButton.disabled = false;
     } else {
-        stopFullRecognitionAndCamera();
+        fullStopRecognitionAndCamera();
     }
 };
 
 restartGameButton.onclick = () => {
     startGame();
-    // If camera was stopped due to game end, re-enable recognition if camera is still technically on
-    if (camera && camera.stream && camera.stream.active && !recognizing) {
-        recognizing = true; // Allow recognition for the new game
-        statusText.textContent = 'Webcam đang chạy. Thực hiện thủ ngữ...';
-        startCameraButton.innerHTML = '<i class="fa-solid fa-stop" style="margin-right: 10px;"></i>Dừng Camera';
-    } else if (!camera || !camera.stream || !camera.stream.active) {
-        // If camera was fully stopped, user needs to click "Bật Camera" again
-        statusText.textContent = `Game mới! Nhấn 'Bật Camera'`;
-        startCameraButton.innerHTML = '<i class="fa-solid fa-play" style="margin-right: 10px;"></i>Bật Camera';
-        recognizing = false; // Ensure it's off
+    // If camera was off, user still needs to turn it on.
+    // If camera was on, it continues for the new game.
+    if (recognitionActive) {
+        statusText.textContent = 'Game mới! Thực hiện thủ ngữ...';
     }
 };
 
-// --- 9. Initialization ---
+// --- Initialization ---
 function mainHangman() {
     initializeMediaPipeHands(); // Loads MP and then calls loadTrainingData
-    startGame(); // Setup game state and UI
+    startGame(); // Setup initial game state
 }
+
+// Helper for instructions
+function toggleInstructions() {
+    const instructionBox = document.querySelector('.instruction-box');
+    if (instructionBox) instructionBox.classList.toggle('collapsed');
+}
+
 
 mainHangman();

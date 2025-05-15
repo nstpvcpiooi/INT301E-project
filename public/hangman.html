@@ -13,93 +13,187 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
     <style>
-        /* Styles from your previous hangman.html, plus new ones */
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        button:disabled:hover { opacity: 0.5; }
+        /* Styles specific to hangman.html */
+        .hangman-main-container { /* New wrapper for game and camera */
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 1200px; /* Adjust as needed */
+            margin: 20px auto;
+        }
 
-        .game-area {
-            padding: 10px;
-            display: flex; /* For layout of hangman figure and word */
+        .game-column {
+            flex: 1;
+            display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            background-color: var(--card-bg, #ffffff);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--card-shadow, rgba(0,0,0,0.1));
+            border: 1px solid var(--card-border, #ddd);
         }
 
-        /* NEW: Hangman Figure Display */
-        .hangman-figure-container {
-            width: 150px; /* Adjust as needed */
-            height: 200px; /* Adjust as needed */
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 16px; /* Adjust for figure size */
-            line-height: 1.1;
-            text-align: left;
-            white-space: pre; /* Important for preserving ASCII art spaces */
-            background-color: #f8f9fa;
-            margin-bottom: 15px;
+        .camera-column {
+            flex-basis: 480px; /* Width of the camera + controls */
+            flex-shrink: 0;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            background-color: var(--card-bg, #ffffff);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--card-shadow, rgba(0,0,0,0.1));
+            border: 1px solid var(--card-border, #ddd);
         }
-        #hangman-figure {
-            /* ASCII art will be set by JS */
+        
+        @media (max-width: 900px) {
+            .hangman-main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .camera-column {
+                width: 100%;
+                max-width: 480px; /* Ensure it doesn't get too wide */
+            }
         }
-        /* END NEW */
 
-        .hangman-display { /* This now holds guesses-left and wrong-guesses */
+        .hangman-figure-container {
+            width: 250px; /* Adjust size of hangman drawing area */
+            height: 300px; /* Adjust size */
+            margin: 0 auto 20px auto;
+            position: relative; /* For absolute positioning of parts if needed */
+        }
+
+        .hangman-figure-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hangman-figure-container svg .figure-part {
+            stroke: var(--text-color, #333);
+            stroke-width: 4;
+            fill: transparent;
+            stroke-linecap: round;
+            display: none; /* Initially hidden, JS will show them */
+        }
+        body.dark-theme .hangman-figure-container svg .figure-part {
+            stroke: var(--text-color, #e0e0e0);
+        }
+
+
+        .game-info {
             text-align: center;
-            margin-bottom: 10px; /* Reduced margin */
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .game-info p {
+            margin: 8px 0;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+        .game-info span {
+            font-weight: bold;
+            color: var(--primary-color, #007bff);
+        }
+        body.dark-theme .game-info span {
+            color: var(--link-color, #63b3ed);
+        }
+
+
+        #word-to-guess {
+            font-size: 2.5em; /* Larger word display */
+            letter-spacing: 0.3em;
+            font-weight: bold;
+            color: var(--header-color, #2c3e50);
+            margin: 20px 0;
             padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            border: 1px solid #e9ecef;
-        }
-        .hangman-display p { margin: 5px 0; font-size: 1.1em; color: #495057; }
-        .hangman-display span { font-weight: bold; color: #2c3e50; }
-
-        .word-display {
-            font-size: 2.2em; font-weight: bold; text-align: center;
-            letter-spacing: 0.3em; color: #2c3e50;
-            font-family: "Courier New", Courier, monospace;
-            padding: 15px; background-color: #f8f9fa;
-            border-radius: 10px; border: 1px solid #e9ecef;
-            min-height: 1.5em; /* Ensure space for word */
+            background-color: var(--input-bg, #f8f9fa);
+            border-radius: 8px;
+            border: 1px solid var(--card-border, #e9ecef);
+            min-height: 1.5em;
         }
 
-        .game-message {
-            text-align: center; font-size: 1.2em; margin: 15px 0;
-            padding: 10px; border-radius: 8px; transition: all 0.3s ease;
-            min-height: 1.5em; /* Ensure space for message */
+        #wrong-guesses-display { /* Renamed for clarity */
+            color: var(--error-color-text, #dc3545);
+            font-weight: bold;
+            min-height: 1.2em; /* Ensure space even if empty */
         }
-        .game-message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .game-message.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        .recognition-controls { /* Styles for camera and recognized char area */
+        .game-status-message { /* Renamed for clarity */
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 1.5em;
+        }
+        .game-status-message.won { color: var(--success-color-text, green); }
+        .game-status-message.lost { color: var(--error-color-text, red); }
+
+
+        /* Camera and Recognition Controls Styling */
+        .camera-column .video-container {
+            width: 100%;
+            max-width: 400px; /* Slightly smaller video */
+            height: 300px;
+            background-color: #000;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .camera-column .input_video { display: none; }
+        .camera-column .output_canvas { width: 100%; height: 100%; display: block; border-radius: 8px;}
+
+        .recognition-controls {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            min-width: 250px;
+            width: 100%;
         }
-        .recognition-controls h2 { margin-top: 0; font-size: 1.3em; }
-        #recognized-char { font-size: 2.5em; font-weight: bold; color: #28a745; min-height: 1.5em;}
-        #hold-indicator-hangman { font-size: 0.9em; color: #007bff; height: 1.2em; }
-
-
-        .game-controls {
-            display: flex; flex-direction: row; align-items: center;
-            justify-content: center; gap: 15px; margin: 25px 0;
+        .recognition-controls h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: var(--header-color);
         }
-        #start-camera-button { background-color: #28a745; color: white; }
-        #start-camera-button:hover:not(:disabled) { background-color: #218838; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); }
-        /* Submit guess button is removed, hold logic will trigger guess */
-        #restart-game-button { background-color: #dc3545; color: white; }
-        #restart-game-button:hover { background-color: #c82333; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3); }
+        #recognized-char-hangman { /* Specific ID for hangman page */
+            font-size: 2.2em;
+            font-weight: bold;
+            color: var(--primary-color, #28a745);
+            min-height: 1.5em;
+        }
+        body.dark-theme #recognized-char-hangman {
+            color: var(--link-color, #63b3ed);
+        }
+        #hold-indicator-hangman { /* Specific ID */
+            font-size: 0.9em;
+            color: var(--text-color);
+            opacity: 0.8;
+            height: 1.2em;
+        }
+
+        .game-action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        /* General button styling is in book_style.css or styles.css */
+        /* Specific overrides for hangman buttons if needed */
+        #start-camera-button, #restart-game-button {
+             padding: 12px 25px;
+        }
+        #submit-guess-button-hangman { /* Specific ID */
+            background-color: var(--primary-color);
+        }
+        #submit-guess-button-hangman:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
     </style>
 </head>
-<body>
+<body class=""> <!-- Theme class added by JS -->
+    <button id="theme-toggle-button">Chuyển Theme</button> <!-- Assuming you have theme-switcher.js -->
+
     <div class="container">
         <!-- Sidebar -->
         <nav class="sidebar">
@@ -121,91 +215,75 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="dictionary-container"> <!-- Using existing class for overall page structure -->
-                <h1>Trò chơi đoán từ (Hangman ASL)</h1>
-                <p class="note">Sử dụng thủ ngữ (A-Y) để đoán chữ. Giữ ký hiệu 1 giây để xác nhận.</p>
-
-                <div class="dictionary-layout"> <!-- Using existing class for two-column layout -->
-                    <!-- Left side - Camera & Recognition -->
-                    <div class="camera-section">
-                        <div class="video-container">
-                            <video class="input_video" id="input_video" autoplay playsinline style="display: none;"></video>
-                            <canvas class="output_canvas" id="output_canvas" width="640" height="480" style="-webkit-transform: scaleX(-1); transform: scaleX(-1);"></canvas>
-                        </div>
-                        <div class="controls recognition-controls"> <!-- Merged controls -->
-                            <button id="start-camera-button" class="btn-primary">
-                                <i class="fa-solid fa-play" style="margin-right: 10px;"></i>
-                                Bật Camera
-                            </button>
-                            <p id="status-text" class="status-message">Nhấn "Bắt đầu" và cho phép webcam.</p>
-                            <h2>Đang nhận diện: <span id="recognized-char">---</span></h2>
-                            <p id="hold-indicator-hangman"></p> <!-- Hold indicator for Hangman -->
-                        </div>
-                        <div class="instruction-box collapsed">
-                            <div class="instruction-header" onclick="toggleInstructions()">
-                                <i class="fas fa-info-circle"></i>
-                                <h3>Hướng dẫn sử dụng</h3>
-                                <i class="fas fa-chevron-down toggle-icon"></i>
-                            </div>
-                            <div class="instruction-content">
-                                <p>Bật camera. Thực hiện cử chỉ ASL cho chữ cái bạn muốn đoán. Giữ cử chỉ ổn định trong 1 giây để xác nhận lượt đoán.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right side - Game Area -->
-                    <div class="right-side">
-                        <div class="game-area">
-                            <div class="hangman-figure-container">
-                                <pre id="hangman-figure">
-  +---+
-  |   |
-      |
-      |
-      |
-      |
-=========</pre>
-                            </div>
-                            <div class="word-display">
-                                <p id="word-to-guess">_ _ _ _ _</p>
-                            </div>
-                            <div class="hangman-display">
-                                <p>Số lượt đoán sai còn lại: <span id="guesses-left">6</span></p>
-                                <p>Các chữ đã đoán sai: <span id="wrong-guesses"></span></p>
-                            </div>
-                            <p id="game-status" class="game-message"></p>
-                            <div class="game-controls">
-                                <button id="restart-game-button" class="btn-primary">
-                                    <i class="fas fa-redo" style="margin-right: 10px;"></i>
-                                    Chơi Lại
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="page-header">
+                <h1>Hangman với Nhận Diện Thủ Ngữ ASL</h1>
             </div>
 
-            <!-- Data collection section (hidden by default as per your original) -->
-            <div class="data-collection" style="display: none;">
-                <h3>Công Cụ Thu Thập Dữ Liệu Mẫu</h3>
-                <label for="char-label">Nhãn chữ cái (A-Y, không J, Z):</label>
-                <input type="text" id="char-label" maxlength="1" size="3">
-                <button id="capture-sample-button" disabled>Lưu Mẫu Này</button>
-                <div class="data-actions">
-                    <button id="clear-data-button">Xóa Tất Cả Mẫu Đã Lưu</button>
-                    <button id="export-data-button">Xuất Dữ Liệu Mẫu (JSON)</button>
-                    <label for="import-file" class="import-button">Nhập Dữ Liệu Mẫu (JSON)</label>
-                    <input type="file" id="import-file" accept=".json" style="display: none;">
+            <div class="hangman-main-container">
+                <div class="game-column">
+                    <div class="hangman-figure-container">
+                        <svg height="100%" width="100%" viewBox="0 0 250 300">
+                            <!-- Gallows -->
+                            <line class="figure-part gallows" x1="30" y1="280" x2="150" y2="280" /> <!-- Base -->
+                            <line class="figure-part gallows" x1="60" y1="280" x2="60" y2="50" />  <!-- Pole -->
+                            <line class="figure-part gallows" x1="60" y1="50" x2="180" y2="50" />  <!-- Beam -->
+                            <line class="figure-part gallows" x1="180" y1="50" x2="180" y2="80" /> <!-- Rope -->
+                            <!-- Hangman Parts (initially display:none; JS will show them) -->
+                            <circle class="figure-part head" cx="180" cy="105" r="25" /> <!-- Head -->
+                            <line class="figure-part body" x1="180" y1="130" x2="180" y2="200" /> <!-- Body -->
+                            <line class="figure-part arm-left" x1="180" y1="150" x2="140" y2="180" /> <!-- Left Arm -->
+                            <line class="figure-part arm-right" x1="180" y1="150" x2="220" y2="180" /> <!-- Right Arm -->
+                            <line class="figure-part leg-left" x1="180" y1="200" x2="150" y2="250" /> <!-- Left Leg -->
+                            <line class="figure-part leg-right" x1="180" y1="200" x2="210" y2="250" /> <!-- Right Leg -->
+                        </svg>
+                    </div>
+
+                    <div class="game-info">
+                        <p>Số lượt đoán sai còn lại: <span id="guesses-left-display">6</span></p>
+                        <p>Các chữ đã đoán sai: <span id="wrong-guesses-display"></span></p>
+                    </div>
+                    <div id="word-to-guess">_ _ _ _ _</div>
+                    <p id="game-status-message" class="game-status-message"></p>
+                    <div class="game-action-buttons">
+                        <button id="restart-game-button" class="btn-secondary">
+                            <i class="fas fa-redo" style="margin-right: 8px;"></i>Chơi Lại
+                        </button>
+                    </div>
+                </div>
+
+                <div class="camera-column">
+                    <div class="video-container">
+                        <video class="input_video" id="input_video" autoplay playsinline></video>
+                        <canvas class="output_canvas" id="output_canvas" width="400" height="300"
+                                style=" -webkit-transform: scaleX(-1); transform: scaleX(-1);"></canvas>
+                    </div>
+                    <div class="recognition-controls">
+                         <button id="start-camera-button" class="btn-primary">
+                            <i class="fa-solid fa-camera" style="margin-right: 8px;"></i>Bật Camera
+                         </button>
+                         <p id="status-text">Nhấn nút trên để bắt đầu.</p>
+                         <h2>Đang nhận diện: <span id="recognized-char-hangman">---</span></h2>
+                         <p id="hold-indicator-hangman"></p>
+                         <!-- Submit button is removed, guess happens on hold -->
+                    </div>
+                    <div class="instruction-box collapsed" style="margin-top: 15px; width:100%; max-width: 400px;">
+                        <div class="instruction-header" onclick="toggleInstructions()">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>Hướng dẫn chơi</h3>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="instruction-content">
+                            <p>- Bật camera và thực hiện thủ ngữ cho chữ cái bạn muốn đoán.</p>
+                            <p>- Giữ ký hiệu ổn định trong 1 giây để gửi lượt đoán.</p>
+                            <p>- Bạn có tối đa 6 lượt đoán sai.</p>
+                            <p>- Sử dụng bộ dữ liệu chữ cái (A-Y) đã được huấn luyện.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
     <script src="/hangman.js"></script>
-    <script>
-        function toggleInstructions() { // Simple toggle for instructions
-            const instructionBox = document.querySelector('.instruction-box');
-            instructionBox.classList.toggle('collapsed');
-        }
-    </script>
+    <script src="/theme-switcher.js"></script> <!-- If you have this for theme toggling -->
 </body>
 </html>
